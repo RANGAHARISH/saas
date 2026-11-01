@@ -1,5 +1,7 @@
 "use server"
 
+import { isMockMode } from "@/lib/mock-data"
+
 interface PlausibleApiResponse {
   results: {
     metrics: number[]
@@ -7,7 +9,11 @@ interface PlausibleApiResponse {
   }[]
 }
 
+// Fast path local : pas d'appel réseau, stats démo instantanées
+const MOCK_STATS = isMockMode()
+
 export async function getLast24hVisitors(): Promise<number | null> {
+  if (MOCK_STATS) return 87
   const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY
   const PLAUSIBLE_SITE_ID = process.env.PLAUSIBLE_SITE_ID
   const PLAUSIBLE_URL = process.env.PLAUSIBLE_URL
@@ -73,6 +79,7 @@ export async function getLast24hVisitors(): Promise<number | null> {
 }
 
 export async function getLast7DaysVisitors(): Promise<number | null> {
+  if (MOCK_STATS) return 642
   const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY
   const PLAUSIBLE_SITE_ID = process.env.PLAUSIBLE_SITE_ID
   const PLAUSIBLE_URL = process.env.PLAUSIBLE_URL
@@ -135,6 +142,7 @@ export async function getLast7DaysVisitors(): Promise<number | null> {
 }
 
 export async function getLast30DaysVisitors(): Promise<number | null> {
+  if (MOCK_STATS) return 1284
   const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY
   const PLAUSIBLE_SITE_ID = process.env.PLAUSIBLE_SITE_ID
   const PLAUSIBLE_URL = process.env.PLAUSIBLE_URL
@@ -197,6 +205,7 @@ export async function getLast30DaysVisitors(): Promise<number | null> {
 }
 
 export async function getLast30DaysPageviews(): Promise<number | null> {
+  if (MOCK_STATS) return 4521
   const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY
   const PLAUSIBLE_SITE_ID = process.env.PLAUSIBLE_SITE_ID
   const PLAUSIBLE_URL = process.env.PLAUSIBLE_URL

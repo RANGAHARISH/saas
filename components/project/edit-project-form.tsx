@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 
 import { RiCheckLine, RiCloseLine, RiHashtag, RiLoader4Line } from "@remixicon/react"
 import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import {
   Select,
   SelectContent,
@@ -18,6 +18,17 @@ import {
 } from "@/components/ui/select"
 import { updateProject } from "@/app/actions/project-details"
 import { getAllCategories } from "@/app/actions/projects"
+
+// Perf (audit H3): the tiptap editor is heavy — load it on demand.
+const RichTextEditor = dynamic(
+  () => import("@/components/ui/rich-text-editor").then((m) => m.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-muted/40 h-[168px] w-full animate-pulse rounded-md border" aria-hidden />
+    ),
+  },
+)
 
 interface EditProjectFormProps {
   projectId: string

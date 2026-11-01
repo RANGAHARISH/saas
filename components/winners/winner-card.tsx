@@ -59,31 +59,43 @@ export function WinnerCard({
   }
 
   return (
-    <div className="dark:bg-secondary/20 overflow-hidden rounded-lg border border-zinc-100 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.05)] dark:border-zinc-800/50">
+    <div className="border-border bg-card overflow-hidden rounded-[20px] border shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
       <div className="p-5">
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
             <div className="relative h-20 w-20 shadow-sm">
-              <Image
-                src={thumbnail || "/placeholder.svg"}
-                alt={name}
-                fill
-                sizes="(max-width: 640px) 64px, 80px"
-                className="rounded-md object-cover"
-              />
+              {thumbnail ? (
+                <Image
+                  src={thumbnail}
+                  alt={name}
+                  fill
+                  sizes="(max-width: 640px) 64px, 80px"
+                  className="rounded-md object-cover"
+                />
+              ) : (
+                <div className="bg-copper-soft text-copper-deep flex h-full w-full items-center justify-center rounded-md text-2xl font-bold">
+                  {name.charAt(0)}
+                </div>
+              )}
               <div className="absolute -top-4 -left-4 z-10">{getRankingIcon()}</div>
             </div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-col gap-1">
               <h3 className="truncate text-xl font-semibold">{name}</h3>
-              <Badge variant="secondary">{getRankingText()}</Badge>
+              {dailyRanking === 1 ? (
+                <Badge className="bg-copper hover:bg-copper-deep border-transparent text-white">
+                  {getRankingText()}
+                </Badge>
+              ) : (
+                <Badge variant="secondary">{getRankingText()}</Badge>
+              )}
               <p className="text-muted-foreground line-clamp-2 text-sm">{stripHtml(description)}</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-3 dark:border-zinc-800/50">
+        <div className="border-border mt-4 flex items-center justify-between border-t pt-3">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1 text-sm">
               <span className="text-foreground font-medium">{upvoteCount}</span>{" "}

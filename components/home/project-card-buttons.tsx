@@ -35,11 +35,11 @@ export function ProjectCardButtons({
     <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-start">
       <Link
         href={`${projectPageUrl}#comments`}
-        className="hover:border-primary dark:hover:border-primary group hidden h-12 w-12 flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 sm:flex"
+        className="hover:border-copper group hidden h-12 w-12 flex-col items-center justify-center rounded-xl border-2 transition-all duration-300 sm:flex"
         aria-label={`View comments for ${projectName}`}
       >
-        <RiMessage2Line className="h-3.5 w-3.5 text-gray-700 dark:text-gray-300" />
-        <span className="mt-1 text-sm leading-none font-semibold text-gray-700 dark:text-gray-300">
+        <RiMessage2Line className="text-muted-foreground h-3.5 w-3.5" />
+        <span className="text-muted-foreground mt-1 text-sm leading-none font-semibold">
           {commentCount}
         </span>
       </Link>
@@ -56,8 +56,8 @@ export function ProjectCardButtons({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex h-12 w-12 flex-col items-center justify-center rounded-xl border-2 border-dashed">
-                <RiThumbUpLine className="h-3.5 w-3.5 text-gray-700 dark:text-gray-300" />
-                <span className="mt-1 text-sm leading-none font-semibold text-gray-700 dark:text-gray-300">
+                <RiThumbUpLine className="text-muted-foreground h-3.5 w-3.5" />
+                <span className="text-muted-foreground mt-1 text-sm leading-none font-semibold">
                   {upvoteCount}
                 </span>
               </div>

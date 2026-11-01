@@ -164,5 +164,14 @@ export async function PATCH(req: NextRequest, context: any) {
   }
 }
 
-// Export other methods without modification
-export const { GET, DELETE } = commentHandler
+// Export other methods without modification (wrappers typed for Next route validation)
+export async function GET(req: NextRequest, context: { params: Promise<{ comment?: string[] }> }) {
+  return commentHandler.GET(req, context as never)
+}
+
+export async function DELETE(
+  req: NextRequest,
+  context: { params: Promise<{ comment?: string[] }> },
+) {
+  return commentHandler.DELETE(req, context as never)
+}

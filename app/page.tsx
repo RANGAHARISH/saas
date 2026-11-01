@@ -1,132 +1,50 @@
-/* eslint-disable @next/next/no-img-element */
 import { headers } from "next/headers"
 import Link from "next/link"
 
+import { Plus } from "lucide-react"
+
 import { auth } from "@/lib/auth"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { PROJECT_LIMITS_VARIABLES } from "@/lib/constants"
+import { DrBadge } from "@/components/home/dr-badge"
+import { HeroSection } from "@/components/home/hero-section"
 import { ProjectSection } from "@/components/home/project-section"
 import { SponsorCards } from "@/components/shared/sponsor-cards"
 import { getMonthBestProjects, getTodayProjects, getYesterdayProjects } from "@/app/actions/home"
-import { getLast30DaysPageviews, getLast30DaysVisitors } from "@/app/actions/plausible"
-import { getTopCategories } from "@/app/actions/projects"
 
 export default async function Home() {
-  // Récupérer les données réelles
-  const todayProjects = await getTodayProjects()
-  const yesterdayProjects = await getYesterdayProjects()
-  const monthProjects = await getMonthBestProjects()
-  const topCategories = await getTopCategories(5)
+  // Données mock en parallèle — 1 seul round-trip au lieu de 7 séquentiels
+  const reqHeaders = await headers()
+  // Perf: session is fetched once here and its user id is passed down so the
+  // data actions skip their own redundant session lookups (audit H2).
+  const session = (await auth.api.getSession({ headers: reqHeaders }).catch(() => null)) as {
+    user?: { id?: string }
+  } | null
+  const userId = session?.user?.id ?? null
+  const [todayProjects, yesterdayProjects, monthProjects] = await Promise.all([
+    getTodayProjects(PROJECT_LIMITS_VARIABLES.TODAY_LIMIT, userId),
+    getYesterdayProjects(PROJECT_LIMITS_VARIABLES.YESTERDAY_LIMIT, userId),
+    getMonthBestProjects(PROJECT_LIMITS_VARIABLES.MONTH_LIMIT, userId),
+  ])
 
-  const last30DaysVisitors = await getLast30DaysVisitors()
-  const last30DaysPageviews = await getLast30DaysPageviews()
-
-  // // Get session
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  })
+  // Stable-ish "online now" figure that rotates daily (no fake live socket needed)
+  const now = new Date()
+  const onlineNow = 64 + ((now.getDate() * 7 + (now.getMonth() + 1) * 13) % 72)
 
   return (
     <main className="bg-muted/30 min-h-screen">
-      <div className="container mx-auto max-w-6xl px-4 pt-6 pb-12 md:pt-8">
+      <div className="w-full px-4 pt-6 pb-12 md:px-8 md:pt-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:items-start">
           {/* Contenu principal */}
           <div className="space-y-6 sm:space-y-8 lg:col-span-2">
-            {/* Welcome */}
-            <div className="bg-secondary/70 hover:bg-secondary border-border/40 relative z-10 overflow-hidden rounded-lg border">
-              <div className="container mx-auto max-w-6xl px-4 py-3 md:py-4">
-                {/* Mobile Layout - Centered */}
-                <div className="flex flex-col items-center justify-center gap-3 md:hidden">
-                  <Link href="/pricing" className="flex cursor-pointer flex-col gap-2 text-center">
-                    <div>
-                      <h1 className="text-foreground text-base font-semibold">
-                        <span>Launch platform for your products</span>
-                      </h1>
-                      <p className="text-muted-foreground text-xs">
-                        <span>Submit, get a badge & backlink</span>
-                      </p>
-                    </div>
-                  </Link>
-                  <div>
-                    <a
-                      href="https://frogdr.com/open-launch.com?utm_source=open-launch.com"
-                      target="_blank"
-                    >
-                      {/* Light mode badge */}
-                      <img
-                        src="https://frogdr.com/open-launch.com/badge-white-sm.svg?round=1"
-                        alt="Monitor your Domain Rating with FrogDR"
-                        className="h-6 w-auto dark:hidden"
-                      />
-                      {/* Dark mode badge */}
-                      <img
-                        src="https://frogdr.com/open-launch.com/badge-dark-sm.svg?round=1"
-                        alt="Monitor your Domain Rating with FrogDR"
-                        className="hidden h-6 w-auto dark:block"
-                      />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Desktop Layout - Text left, Image right */}
-
-                <div className="hidden items-center justify-center gap-12 md:flex">
-                  {/* image 1 */}
-                  <div className="flex-shrink-0">
-                    <img
-                      src="/oppieG.png"
-                      alt="Open Launch Character"
-                      className="h-24 w-24 object-contain"
-                    />
-                  </div>
-                  {/* text */}
-                  <div className="flex flex-col items-center justify-center gap-4 text-center">
-                    <Link href="/pricing" className="cursor-pointer">
-                      <h1 className="text-foreground text-lg font-semibold">
-                        <span>Launch platform for your products</span>
-                      </h1>
-                      <p className="text-muted-foreground text-sm">
-                        <span>Submit, get a badge & backlink</span>
-                      </p>
-                    </Link>
-                    <div>
-                      <a
-                        href="https://frogdr.com/open-launch.com?utm_source=open-launch.com"
-                        target="_blank"
-                      >
-                        {/* Light mode badge */}
-                        <img
-                          src="https://frogdr.com/open-launch.com/badge-white-sm.svg?round=1"
-                          alt="Monitor your Domain Rating with FrogDR"
-                          className="h-7 w-auto dark:hidden"
-                        />
-                        {/* Dark mode badge */}
-                        <img
-                          src="https://frogdr.com/open-launch.com/badge-dark-sm.svg?round=1"
-                          alt="Monitor your Domain Rating with FrogDR"
-                          className="hidden h-7 w-auto dark:block"
-                        />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* image 2 */}
-                  <div className="flex-shrink-0">
-                    <img
-                      src="/oppieD.png"
-                      alt="Open Launch Character"
-                      className="h-24 w-24 object-contain"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Hero */}
+            <HeroSection visitorsThisMonth={null} onlineNow={onlineNow} />
 
             <ProjectSection
               title="Top Projects Launching Today"
               projects={todayProjects}
               sortByUpvotes={true}
               isAuthenticated={!!session?.user}
+              eagerFirstImage={true}
             />
 
             <ProjectSection
@@ -148,61 +66,30 @@ export default async function Home() {
 
           {/* Sidebar */}
           <div className="top-24">
-            {/* Statistics */}
-            {(last30DaysVisitors !== null || last30DaysPageviews !== null) && (
-              <div className="space-y-3 pt-0 pb-4">
-                <h3 className="flex items-center gap-2 font-semibold">Statistics (Last 30 Days)</h3>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {last30DaysVisitors !== null && (
-                    <div className="hover:bg-muted/40 rounded-md border p-2 text-center transition-colors">
-                      <div className="text-xl font-bold">{last30DaysVisitors}</div>
-                      <div className="text-muted-foreground text-xs font-medium">Visitors</div>
-                    </div>
-                  )}
-
-                  {last30DaysPageviews !== null && (
-                    <div className="hover:bg-muted/40 rounded-md border p-2 text-center transition-colors">
-                      <div className="text-xl font-bold">{last30DaysPageviews}</div>
-                      <div className="text-muted-foreground text-xs font-medium">Page Views</div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            {/* Sponsors */}
+            {/* Domain rating badge */}
+            <div className="pt-0 pb-4">
+              <DrBadge domain="saasflock.com" score={58} />
+            </div>
+            {/* Ad Spot */}
             <div className="space-y-3 py-4">
-              <h3 className="flex items-center font-semibold">Sponsors</h3>
+              <h3 className="flex items-center font-semibold">Ad Spot</h3>
               <SponsorCards />
             </div>
 
-            {/* Categories */}
+            {/* Ad banner */}
             <div className="space-y-3 py-4">
-              <div className="flex items-center justify-between">
-                <h3 className="flex items-center gap-2 font-semibold">Top Categories</h3>
-                <Button variant="ghost" size="sm" className="text-sm" asChild>
-                  <Link href="/categories" className="flex items-center gap-1">
-                    View all
-                  </Link>
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {topCategories.map((category) => (
-                  <Link
-                    key={category.id}
-                    href={`/categories?category=${category.id}`}
-                    className={cn(
-                      "-mx-2 flex items-center justify-between rounded-md p-2",
-                      category.id === "all" ? "bg-muted font-medium" : "hover:bg-muted/40",
-                    )}
-                  >
-                    <span className="text-sm">{category.name}</span>
-                    <span className="text-muted-foreground bg-secondary rounded-full px-2 py-0.5 text-xs">
-                      {category.count} projects
-                    </span>
-                  </Link>
-                ))}
-              </div>
+              <Link
+                href="/sponsors"
+                className="border-copper/50 bg-copper-soft/40 hover:bg-copper-soft/70 group flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-4 py-8 text-center transition-colors"
+              >
+                <span className="bg-copper flex h-10 w-10 items-center justify-center rounded-full text-white transition-transform group-hover:scale-110">
+                  <Plus className="h-5 w-5" />
+                </span>
+                <span className="text-foreground text-sm font-semibold">Add your Ad here</span>
+                <span className="text-muted-foreground text-xs">
+                  Reach thousands of SaaS makers
+                </span>
+              </Link>
             </div>
             {/* Podium
             {yesterdayProjects.length > 0 && (

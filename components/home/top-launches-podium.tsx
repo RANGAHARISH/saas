@@ -37,12 +37,18 @@ export default function TopLaunchesPodium({ topProjects }: TopLaunchesPodiumProp
             title={project.name}
           >
             <div className="relative aspect-square h-12 w-12 sm:h-14 sm:w-14">
-              <Image
-                src={project.logoUrl || "/placeholder.svg"}
-                alt={project.name}
-                fill
-                className="rounded-md object-cover transition-opacity group-hover:opacity-90"
-              />
+              {project.logoUrl ? (
+                <Image
+                  src={project.logoUrl}
+                  alt={project.name}
+                  fill
+                  className="rounded-md object-cover transition-opacity group-hover:opacity-90"
+                />
+              ) : (
+                <div className="bg-copper-soft text-copper-deep flex h-full w-full items-center justify-center rounded-md text-lg font-bold transition-opacity group-hover:opacity-90">
+                  {project.name.charAt(0)}
+                </div>
+              )}
               <div
                 className={`bg-primary text-primary-foreground absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#FDFDFD] dark:border-[#1D1D1D]`}
               >

@@ -17,10 +17,30 @@ import { and, desc, eq, sql } from "drizzle-orm"
 
 import { auth } from "@/lib/auth"
 import { PROJECT_LIMITS_VARIABLES } from "@/lib/constants"
+import {
+  getMockMonth,
+  getMockToday,
+  getMockWinners,
+  getMockYesterday,
+  isMockMode,
+} from "@/lib/mock-data"
+
+const shouldUseMock = () => isMockMode()
 
 async function getCurrentUserId() {
-  const session = await auth.api.getSession({ headers: await headers() })
-  return session?.user?.id ?? null
+  try {
+    const session = await auth.api.getSession({ headers: await headers() })
+    return session?.user?.id ?? null
+  } catch {
+    return null
+  }
+}
+
+// Perf: callers that already hold the session pass the user id through so we
+// don't pay for a redundant session lookup per section. `undefined` preserves
+// the old behavior (resolve internally) for existing callers.
+function resolveUserId(userId: string | null | undefined): Promise<string | null> {
+  return userId !== undefined ? Promise.resolve(userId) : getCurrentUserId()
 }
 
 async function enrichProjectsWithUserData<T extends { id: string }>(
@@ -36,7 +56,9 @@ async function enrichProjectsWithUserData<T extends { id: string }>(
 
   const projectIds = projects.map((p) => p.id)
 
-  const categoriesData = await db
+  // Perf: categories + upvotes are independent — fetch in parallel instead of
+  // sequentially.
+  const categoriesPromise = db
     .select({
       projectId: projectToCategory.projectId,
       categoryId: categoryTable.id,
@@ -45,6 +67,15 @@ async function enrichProjectsWithUserData<T extends { id: string }>(
     .from(projectToCategory)
     .innerJoin(categoryTable, eq(categoryTable.id, projectToCategory.categoryId))
     .where(sql`${projectToCategory.projectId} IN ${projectIds}`)
+
+  const upvotesPromise = userId
+    ? db
+        .select({ projectId: upvote.projectId })
+        .from(upvote)
+        .where(and(eq(upvote.userId, userId), sql`${upvote.projectId} IN ${projectIds}`))
+    : Promise.resolve([] as { projectId: string }[])
+
+  const [categoriesData, userUpvotes] = await Promise.all([categoriesPromise, upvotesPromise])
 
   const categoriesByProjectId = categoriesData.reduce(
     (acc, row) => {
@@ -57,14 +88,7 @@ async function enrichProjectsWithUserData<T extends { id: string }>(
     {} as Record<string, { id: string; name: string }[]>,
   )
 
-  let userUpvotedProjectIds = new Set<string>()
-  if (userId) {
-    const userUpvotes = await db
-      .select({ projectId: upvote.projectId })
-      .from(upvote)
-      .where(and(eq(upvote.userId, userId), sql`${upvote.projectId} IN ${projectIds}`))
-    userUpvotedProjectIds = new Set(userUpvotes.map((uv) => uv.projectId))
-  }
+  const userUpvotedProjectIds = new Set(userUpvotes.map((uv) => uv.projectId))
 
   return projects.map((project) => ({
     ...project,
@@ -73,39 +97,47 @@ async function enrichProjectsWithUserData<T extends { id: string }>(
   }))
 }
 
-export async function getTodayProjects(limit: number = PROJECT_LIMITS_VARIABLES.TODAY_LIMIT) {
-  const userId = await getCurrentUserId()
-  const todayProjectsBase = await db
-    .select({
-      id: projectTable.id,
-      name: projectTable.name,
-      slug: projectTable.slug,
-      description: projectTable.description,
-      logoUrl: projectTable.logoUrl,
-      websiteUrl: projectTable.websiteUrl,
-      launchStatus: projectTable.launchStatus,
-      launchType: projectTable.launchType,
-      dailyRanking: projectTable.dailyRanking,
-      scheduledLaunchDate: projectTable.scheduledLaunchDate,
-      createdAt: projectTable.createdAt,
-      upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
-      commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
-    })
-    .from(projectTable)
-    .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
-    .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
-    .where(eq(projectTable.launchStatus, launchStatus.ONGOING))
-    .groupBy(projectTable.id)
-    .orderBy(desc(sql`count(distinct ${upvote.id})`))
-    .limit(limit)
+export async function getTodayProjects(
+  limit: number = PROJECT_LIMITS_VARIABLES.TODAY_LIMIT,
+  userId?: string | null,
+) {
+  if (shouldUseMock()) return getMockToday(limit) as never
+  // Perf: main query and session lookup run concurrently.
+  const [todayProjectsBase, resolvedUserId] = await Promise.all([
+    db
+      .select({
+        id: projectTable.id,
+        name: projectTable.name,
+        slug: projectTable.slug,
+        description: projectTable.description,
+        logoUrl: projectTable.logoUrl,
+        websiteUrl: projectTable.websiteUrl,
+        launchStatus: projectTable.launchStatus,
+        launchType: projectTable.launchType,
+        dailyRanking: projectTable.dailyRanking,
+        scheduledLaunchDate: projectTable.scheduledLaunchDate,
+        createdAt: projectTable.createdAt,
+        upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
+        commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
+      })
+      .from(projectTable)
+      .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
+      .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
+      .where(eq(projectTable.launchStatus, launchStatus.ONGOING))
+      .groupBy(projectTable.id)
+      .orderBy(desc(sql`count(distinct ${upvote.id})`))
+      .limit(limit),
+    resolveUserId(userId),
+  ])
 
-  return enrichProjectsWithUserData(todayProjectsBase, userId)
+  return enrichProjectsWithUserData(todayProjectsBase, resolvedUserId)
 }
 
 export async function getYesterdayProjects(
   limit: number = PROJECT_LIMITS_VARIABLES.YESTERDAY_LIMIT,
+  userId?: string | null,
 ) {
-  const userId = await getCurrentUserId()
+  if (shouldUseMock()) return getMockYesterday(limit) as never
   const now = new Date()
   const isBeforeLaunchTime = now.getUTCHours() < 8
   const yesterdayStart = new Date(now)
@@ -118,76 +150,87 @@ export async function getYesterdayProjects(
   const yesterdayEnd = new Date(yesterdayStart)
   yesterdayEnd.setDate(yesterdayEnd.getDate() + 1)
 
-  const yesterdayProjectsBase = await db
-    .select({
-      id: projectTable.id,
-      name: projectTable.name,
-      slug: projectTable.slug,
-      description: projectTable.description,
-      logoUrl: projectTable.logoUrl,
-      websiteUrl: projectTable.websiteUrl,
-      launchStatus: projectTable.launchStatus,
-      launchType: projectTable.launchType,
-      scheduledLaunchDate: projectTable.scheduledLaunchDate,
-      createdAt: projectTable.createdAt,
-      upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
-      commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
-      dailyRanking: projectTable.dailyRanking,
-    })
-    .from(projectTable)
-    .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
-    .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
-    .where(
-      and(
-        eq(projectTable.launchStatus, launchStatus.LAUNCHED),
-        sql`${projectTable.scheduledLaunchDate} >= ${yesterdayStart.toISOString()}`,
-        sql`${projectTable.scheduledLaunchDate} < ${yesterdayEnd.toISOString()}`,
-      ),
-    )
-    .groupBy(projectTable.id)
-    .orderBy(desc(sql`count(distinct ${upvote.id})`))
-    .limit(limit)
+  // Perf: main query and session lookup run concurrently.
+  const [yesterdayProjectsBase, resolvedUserId] = await Promise.all([
+    db
+      .select({
+        id: projectTable.id,
+        name: projectTable.name,
+        slug: projectTable.slug,
+        description: projectTable.description,
+        logoUrl: projectTable.logoUrl,
+        websiteUrl: projectTable.websiteUrl,
+        launchStatus: projectTable.launchStatus,
+        launchType: projectTable.launchType,
+        scheduledLaunchDate: projectTable.scheduledLaunchDate,
+        createdAt: projectTable.createdAt,
+        upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
+        commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
+        dailyRanking: projectTable.dailyRanking,
+      })
+      .from(projectTable)
+      .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
+      .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
+      .where(
+        and(
+          eq(projectTable.launchStatus, launchStatus.LAUNCHED),
+          sql`${projectTable.scheduledLaunchDate} >= ${yesterdayStart.toISOString()}`,
+          sql`${projectTable.scheduledLaunchDate} < ${yesterdayEnd.toISOString()}`,
+        ),
+      )
+      .groupBy(projectTable.id)
+      .orderBy(desc(sql`count(distinct ${upvote.id})`))
+      .limit(limit),
+    resolveUserId(userId),
+  ])
 
-  return enrichProjectsWithUserData(yesterdayProjectsBase, userId)
+  return enrichProjectsWithUserData(yesterdayProjectsBase, resolvedUserId)
 }
 
-export async function getMonthBestProjects(limit: number = PROJECT_LIMITS_VARIABLES.MONTH_LIMIT) {
-  const userId = await getCurrentUserId()
+export async function getMonthBestProjects(
+  limit: number = PROJECT_LIMITS_VARIABLES.MONTH_LIMIT,
+  userId?: string | null,
+) {
+  if (shouldUseMock()) return getMockMonth(limit) as never
   const now = new Date()
   const monthStart = startOfMonth(now)
   const monthEnd = endOfMonth(now)
 
-  const monthProjectsBase = await db
-    .select({
-      id: projectTable.id,
-      name: projectTable.name,
-      slug: projectTable.slug,
-      description: projectTable.description,
-      logoUrl: projectTable.logoUrl,
-      websiteUrl: projectTable.websiteUrl,
-      launchStatus: projectTable.launchStatus,
-      launchType: projectTable.launchType,
-      dailyRanking: projectTable.dailyRanking,
-      scheduledLaunchDate: projectTable.scheduledLaunchDate,
-      createdAt: projectTable.createdAt,
-      upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
-      commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
-    })
-    .from(projectTable)
-    .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
-    .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
-    .where(
-      and(
-        eq(projectTable.launchStatus, launchStatus.LAUNCHED),
-        sql`${projectTable.scheduledLaunchDate} >= ${monthStart.toISOString()}`,
-        sql`${projectTable.scheduledLaunchDate} <= ${monthEnd.toISOString()}`,
-      ),
-    )
-    .groupBy(projectTable.id)
-    .orderBy(desc(sql`count(distinct ${upvote.id})`))
-    .limit(limit)
+  // Perf: main query and session lookup run concurrently.
+  const [monthProjectsBase, resolvedUserId] = await Promise.all([
+    db
+      .select({
+        id: projectTable.id,
+        name: projectTable.name,
+        slug: projectTable.slug,
+        description: projectTable.description,
+        logoUrl: projectTable.logoUrl,
+        websiteUrl: projectTable.websiteUrl,
+        launchStatus: projectTable.launchStatus,
+        launchType: projectTable.launchType,
+        dailyRanking: projectTable.dailyRanking,
+        scheduledLaunchDate: projectTable.scheduledLaunchDate,
+        createdAt: projectTable.createdAt,
+        upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
+        commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
+      })
+      .from(projectTable)
+      .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
+      .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
+      .where(
+        and(
+          eq(projectTable.launchStatus, launchStatus.LAUNCHED),
+          sql`${projectTable.scheduledLaunchDate} >= ${monthStart.toISOString()}`,
+          sql`${projectTable.scheduledLaunchDate} <= ${monthEnd.toISOString()}`,
+        ),
+      )
+      .groupBy(projectTable.id)
+      .orderBy(desc(sql`count(distinct ${upvote.id})`))
+      .limit(limit),
+    resolveUserId(userId),
+  ])
 
-  return enrichProjectsWithUserData(monthProjectsBase, userId)
+  return enrichProjectsWithUserData(monthProjectsBase, resolvedUserId)
 }
 
 export async function getFeaturedPremiumProjects() {
@@ -244,42 +287,46 @@ export async function getYesterdayTopProjects() {
   return topProjects
 }
 
-export async function getWinnersByDate(date: Date) {
-  const userId = await getCurrentUserId()
+export async function getWinnersByDate(date: Date, userId?: string | null) {
+  if (shouldUseMock()) return getMockWinners() as never
   const dayStart = new Date(date)
   dayStart.setHours(0, 0, 0, 0)
   const dayEnd = new Date(date)
   dayEnd.setHours(23, 59, 59, 999)
 
-  const winnersBase = await db
-    .select({
-      id: projectTable.id,
-      name: projectTable.name,
-      slug: projectTable.slug,
-      description: projectTable.description,
-      logoUrl: projectTable.logoUrl,
-      websiteUrl: projectTable.websiteUrl,
-      dailyRanking: projectTable.dailyRanking,
-      launchStatus: projectTable.launchStatus,
-      scheduledLaunchDate: projectTable.scheduledLaunchDate,
-      createdAt: projectTable.createdAt,
-      upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
-      commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
-    })
-    .from(projectTable)
-    .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
-    .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
-    .where(
-      and(
-        eq(projectTable.launchStatus, launchStatus.LAUNCHED),
-        sql`${projectTable.dailyRanking} IS NOT NULL`,
-        sql`${projectTable.dailyRanking} <= 3`,
-        sql`${projectTable.scheduledLaunchDate} >= ${dayStart.toISOString()}`,
-        sql`${projectTable.scheduledLaunchDate} <= ${dayEnd.toISOString()}`,
-      ),
-    )
-    .groupBy(projectTable.id)
-    .orderBy(projectTable.dailyRanking)
+  // Perf: main query and session lookup run concurrently.
+  const [winnersBase, resolvedUserId] = await Promise.all([
+    db
+      .select({
+        id: projectTable.id,
+        name: projectTable.name,
+        slug: projectTable.slug,
+        description: projectTable.description,
+        logoUrl: projectTable.logoUrl,
+        websiteUrl: projectTable.websiteUrl,
+        dailyRanking: projectTable.dailyRanking,
+        launchStatus: projectTable.launchStatus,
+        scheduledLaunchDate: projectTable.scheduledLaunchDate,
+        createdAt: projectTable.createdAt,
+        upvoteCount: sql<number>`cast(count(distinct ${upvote.id}) as int)`.mapWith(Number),
+        commentCount: sql<number>`cast(count(distinct ${fumaComments.id}) as int)`.mapWith(Number),
+      })
+      .from(projectTable)
+      .leftJoin(upvote, eq(upvote.projectId, projectTable.id))
+      .leftJoin(fumaComments, sql`"fuma_comments"."page"::text = ${projectTable.id}`)
+      .where(
+        and(
+          eq(projectTable.launchStatus, launchStatus.LAUNCHED),
+          sql`${projectTable.dailyRanking} IS NOT NULL`,
+          sql`${projectTable.dailyRanking} <= 3`,
+          sql`${projectTable.scheduledLaunchDate} >= ${dayStart.toISOString()}`,
+          sql`${projectTable.scheduledLaunchDate} <= ${dayEnd.toISOString()}`,
+        ),
+      )
+      .groupBy(projectTable.id)
+      .orderBy(projectTable.dailyRanking),
+    resolveUserId(userId),
+  ])
 
-  return enrichProjectsWithUserData(winnersBase, userId)
+  return enrichProjectsWithUserData(winnersBase, resolvedUserId)
 }

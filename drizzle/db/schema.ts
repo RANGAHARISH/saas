@@ -132,6 +132,14 @@ export const project = pgTable(
   (table) => {
     return {
       nameIdx: index("project_name_idx").on(table.name),
+      // Perf (audit H2): hot listing filters/sorts — status + date composite,
+      // ranking lookups, and creator dashboards.
+      statusDateIdx: index("project_status_date_idx").on(
+        table.launchStatus,
+        table.scheduledLaunchDate,
+      ),
+      rankingIdx: index("project_daily_ranking_idx").on(table.dailyRanking),
+      createdByIdx: index("project_created_by_idx").on(table.createdBy),
     }
   },
 )
@@ -170,16 +178,26 @@ export const projectToCategory = pgTable(
 )
 
 // Interactions
-export const upvote = pgTable("upvote", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  projectId: text("project_id")
-    .notNull()
-    .references(() => project.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-})
+export const upvote = pgTable(
+  "upvote",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    projectId: text("project_id")
+      .notNull()
+      .references(() => project.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => {
+    return {
+      // Perf (audit H2): every listing joins/filters votes by project and user.
+      projectUserIdx: index("upvote_project_user_idx").on(table.projectId, table.userId),
+      userIdx: index("upvote_user_idx").on(table.userId),
+    }
+  },
+)
 
 // Tables pour Fuma Comment
 export const fumaRoles = pgTable("fuma_roles", {

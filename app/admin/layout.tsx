@@ -9,7 +9,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     headers: await headers(),
   })
 
-  if (!session?.user || session?.user.role !== "admin") {
+  const role = (session?.user as { role?: string } | undefined)?.role
+
+  if (!session?.user || role !== "admin") {
     // Rediriger vers la page d'accueil si l'utilisateur n'est pas un administrateur
     redirect("/")
   }

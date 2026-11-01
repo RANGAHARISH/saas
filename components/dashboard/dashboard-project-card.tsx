@@ -40,14 +40,14 @@ export function DashboardProjectCard({
   const renderStatusBadge = () => {
     if (launchStatus === "scheduled" && scheduledLaunchDate) {
       return (
-        <span className="flex items-center gap-1 text-blue-600">
+        <span className="text-copper-deep flex items-center gap-1">
           <RiCalendarLine className="h-3.5 w-3.5" />
           Scheduled: {new Date(scheduledLaunchDate).toLocaleDateString()}
         </span>
       )
     } else if (launchStatus === "ongoing") {
       // For ongoing, we'll display upvotes/comments separately
-      return <span className="flex items-center gap-1 text-green-600">Active Launch</span>
+      return <span className="text-pine flex items-center gap-1">Active Launch</span>
     } else if (launchStatus === "launched") {
       return (
         <span className="text-muted-foreground flex items-center gap-1">
@@ -61,13 +61,19 @@ export function DashboardProjectCard({
 
   const cardContent = (
     <>
-      <Image
-        src={logoUrl || "/placeholder.svg"} // Fallback si pas de logo
-        alt={name}
-        width={48}
-        height={48}
-        className="flex-shrink-0 rounded-md bg-white object-contain p-0.5 dark:bg-zinc-800"
-      />
+      {logoUrl ? (
+        <Image
+          src={logoUrl}
+          alt={name}
+          width={48}
+          height={48}
+          className="flex-shrink-0 rounded-md bg-white object-contain p-0.5 dark:bg-zinc-800"
+        />
+      ) : (
+        <div className="bg-copper-soft text-copper-deep flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-md text-lg font-bold">
+          {name.charAt(0)}
+        </div>
+      )}
       <div className="min-w-0 flex-grow">
         <h4 className="truncate text-sm font-medium sm:text-base">{name}</h4>
         <p className="text-muted-foreground mb-1 truncate text-xs sm:text-sm">

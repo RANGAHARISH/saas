@@ -9,7 +9,7 @@ import { RiGithubFill, RiGoogleFill } from "@remixicon/react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { oneTap, signIn } from "@/lib/auth-client"
+import { isOneTapEnabled, oneTap, signIn } from "@/lib/auth-client"
 import { SignInFormData, signInSchema } from "@/lib/validations/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -86,6 +86,7 @@ export function SignInForm() {
   }
 
   useEffect(() => {
+    if (!isOneTapEnabled) return
     oneTap({
       fetchOptions: {
         onError: ({ error }) => {
@@ -96,6 +97,8 @@ export function SignInForm() {
           window.location.href = "/dashboard"
         },
       },
+    }).catch(() => {
+      // One Tap is best-effort (popup blocked, GSI unreachable, ...)
     })
   }, [])
 

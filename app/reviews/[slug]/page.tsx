@@ -37,9 +37,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
 
-  const article = await db.select().from(seoArticle).where(eq(seoArticle.slug, slug)).limit(1)
+  if (process.env.USE_MOCK_DATA === "true") {
+    return {
+      title: "Review not found | Open Launch",
+      description: "The review you're looking for doesn't exist or has been removed.",
+    }
+  }
 
-  if (!article[0]) {
+  let article
+  try {
+    article = await db.select().from(seoArticle).where(eq(seoArticle.slug, slug)).limit(1)
+  } catch {
     return {
       title: "Review not found | Open Launch",
       description: "The review you're looking for doesn't exist or has been removed.",
@@ -93,7 +101,15 @@ function calculateReadingTime(content: string): string {
 export default async function ReviewPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  const article = await db.select().from(seoArticle).where(eq(seoArticle.slug, slug)).limit(1)
+  if (process.env.USE_MOCK_DATA === "true") notFound()
+
+  let article
+  try {
+    article = await db.select().from(seoArticle).where(eq(seoArticle.slug, slug)).limit(1)
+  } catch {
+    console.log("[reviews:mock] article fallback notFound (DB unavailable)")
+    notFound()
+  }
 
   if (!article[0]) {
     notFound()
@@ -104,7 +120,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ slug: s
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
         {/* Back Button */}
         <div className="mb-4">
           <Link

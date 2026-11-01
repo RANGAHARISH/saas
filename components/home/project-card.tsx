@@ -36,6 +36,8 @@ interface ProjectCardProps {
   categories: Category[]
   isAuthenticated: boolean
   websiteUrl?: string
+  // Perf: only the above-the-fold LCP candidate sets this (default lazy).
+  priority?: boolean
 }
 
 export function ProjectCard({
@@ -54,6 +56,7 @@ export function ProjectCard({
   categories,
   isAuthenticated,
   websiteUrl,
+  priority = false,
 }: ProjectCardProps) {
   const router = useRouter()
   const projectPageUrl = `/projects/${slug}`
@@ -74,11 +77,12 @@ export function ProjectCard({
                 src={logoUrl}
                 alt={`${name} logo`}
                 fill
+                priority={priority}
                 className="object-contain"
                 sizes="(max-width: 640px) 48px, 56px"
               />
             ) : (
-              <span className="text-muted-foreground flex h-full w-full items-center justify-center text-xl font-bold">
+              <span className="bg-copper-soft text-copper-deep flex h-full w-full items-center justify-center text-xl font-bold">
                 {name.charAt(0)}
               </span>
             )}

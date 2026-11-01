@@ -15,6 +15,9 @@ import {
 import { and, asc, count, desc, eq, or, sql } from "drizzle-orm"
 
 import { auth } from "@/lib/auth"
+import { getMockTopCategories, isMockMode, MOCK_CATEGORIES, MOCK_PROJECTS } from "@/lib/mock-data"
+
+const shouldUseMock = () => isMockMode()
 
 // Fonction pour générer un slug unique
 async function generateUniqueSlug(name: string): Promise<string> {
@@ -39,19 +42,31 @@ async function generateUniqueSlug(name: string): Promise<string> {
 
 // Get session helper
 async function getSession() {
-  return auth.api.getSession({
-    headers: await headers(),
-  })
+  try {
+    return auth.api.getSession({
+      headers: await headers(),
+    })
+  } catch {
+    return null
+  }
 }
 
 // Get all categories
 export async function getAllCategories() {
+  if (shouldUseMock())
+    return MOCK_CATEGORIES.map((c) => ({
+      id: c.id,
+      name: c.name,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }))
   const categories = await db.select().from(categoryTable).orderBy(categoryTable.name)
   return categories
 }
 
 // Get top categories based on project count
 export async function getTopCategories(limit = 5) {
+  if (shouldUseMock()) return getMockTopCategories(limit) as never
   const topCategories = await db
     .select({
       id: categoryTable.id,
@@ -71,6 +86,7 @@ export async function getTopCategories(limit = 5) {
 
 // Get user's upvoted projects
 export async function getUserUpvotedProjects() {
+  if (shouldUseMock()) return []
   const session = await getSession()
 
   if (!session?.user?.id) {
@@ -98,6 +114,7 @@ export async function getUserComments() {
 
 // Get projects created by user
 export async function getUserCreatedProjects() {
+  if (shouldUseMock()) return []
   const session = await getSession()
 
   if (!session?.user?.id) {
@@ -116,6 +133,8 @@ export async function getUserCreatedProjects() {
 
 // Toggle upvote on a project
 export async function toggleUpvote(projectId: string) {
+  if (shouldUseMock())
+    return { success: false, message: "Mock mode: connect Supabase to enable upvotes" }
   const session = await getSession()
 
   if (!session?.user?.id) {
@@ -206,6 +225,7 @@ interface ProjectSubmissionData {
 
 // Version correcte de submitProject
 export async function submitProject(projectData: ProjectSubmissionData) {
+  if (shouldUseMock()) return { success: false, error: "Mock mode: connect Supabase to submit" }
   const session = await getSession()
 
   if (!session?.user) {
@@ -344,6 +364,16 @@ export async function getProjectsByCategory(
   limit: number = 10,
   sort: string = "recent",
 ) {
+  if (shouldUseMock()) {
+    const filtered =
+      categoryId === "all"
+        ? MOCK_PROJECTS
+        : MOCK_PROJECTS.filter((p) => p.categories.some((c) => c.id === categoryId))
+    return {
+      projects: filtered.slice((page - 1) * limit, page * limit),
+      totalCount: filtered.length,
+    }
+  }
   const session = await getSession()
   const userId = session?.user?.id || null
 
@@ -424,6 +454,10 @@ export async function getProjectsByCategory(
 
 // getCategoryById
 export async function getCategoryById(categoryId: string) {
+  if (shouldUseMock()) {
+    const c = MOCK_CATEGORIES.find((x) => x.id === categoryId)
+    return c ? { id: c.id, name: c.name } : null
+  }
   const categoryData = await db
     .select()
     .from(categoryTable)

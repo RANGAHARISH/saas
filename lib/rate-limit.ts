@@ -1,7 +1,23 @@
 import Redis from "ioredis"
 
-// Créer un client Redis
-const redis = new Redis(process.env.REDIS_URL || "")
+// Créer un client Redis (optionnel en local — fail open si absent)
+const REDIS_URL = process.env.REDIS_URL
+
+let redis: Redis | null = null
+if (REDIS_URL && REDIS_URL.length > 0 && !REDIS_URL.includes("your_")) {
+  try {
+    redis = new Redis(REDIS_URL, {
+      maxRetriesPerRequest: 1,
+      enableReadyCheck: false,
+      retryStrategy: () => null,
+    })
+    redis.on("error", () => {
+      // Silence en local — checkRateLimit fera fail-open
+    })
+  } catch {
+    redis = null
+  }
+}
 
 export async function checkRateLimit(
   identifier: string,
@@ -15,6 +31,10 @@ export async function checkRateLimit(
   const key = `rate-limit:${identifier}`
   const now = Date.now()
   const windowStart = now - window
+
+  if (!redis) {
+    return { success: true, remaining: limit, reset: Math.ceil(window / 1000) }
+  }
 
   try {
     // Nettoyer les anciennes requêtes

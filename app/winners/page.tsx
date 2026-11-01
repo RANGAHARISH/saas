@@ -70,7 +70,7 @@ export default async function WinnersPage({
 
   return (
     <main className="bg-secondary/20 min-h-screen">
-      <div className="container mx-auto max-w-6xl px-4 pt-8 pb-12">
+      <div className="w-full px-4 pt-8 pb-12 md:px-8">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:items-start">
           {/* Contenu principal */}
           <div className="md:col-span-2">

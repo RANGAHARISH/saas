@@ -2,6 +2,7 @@
 "use client"
 
 import { useCallback, useEffect, useId, useState } from "react"
+import dynamic from "next/dynamic"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 
@@ -40,7 +41,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { RichTextDisplay, RichTextEditor } from "@/components/ui/rich-text-editor"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import {
   Select,
   SelectContent,
@@ -58,6 +59,18 @@ import {
 } from "@/app/actions/launch"
 import type { LaunchAvailability } from "@/app/actions/launch"
 import { getAllCategories, submitProject } from "@/app/actions/projects"
+
+// Perf (audit H3): the tiptap editor is heavy — load it on demand so the
+// submit page's initial bundle stays lean. Display stays a light static import.
+const RichTextEditor = dynamic(
+  () => import("@/components/ui/rich-text-editor").then((m) => m.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-muted/40 h-[168px] w-full animate-pulse rounded-md border" aria-hidden />
+    ),
+  },
+)
 
 interface ProjectFormData {
   name: string
@@ -1485,7 +1498,7 @@ export function SubmitProjectForm({ userId }: SubmitProjectFormProps) {
 
               <div className="bg-muted/30 border-t px-6 py-4">
                 <div className="flex items-start gap-3">
-                  <RiInformationLine className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-500" />
+                  <RiInformationLine className="text-copper mt-0.5 h-5 w-5 flex-shrink-0" />
                   <div className="space-y-1 text-sm">
                     <p className="font-medium">Ready to submit?</p>
                     <p className="text-muted-foreground text-xs">

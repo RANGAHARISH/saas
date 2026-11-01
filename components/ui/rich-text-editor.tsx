@@ -16,10 +16,7 @@ import StarterKit from "@tiptap/starter-kit"
 import { cn } from "@/lib/utils"
 
 import { Button } from "./button"
-
-// Styles communs pour le contenu riche
-const RICH_TEXT_STYLES =
-  "prose prose-sm prose-zinc dark:prose-invert max-w-none w-full whitespace-pre-wrap [&_h1]:my-2 [&_h2]:my-1 [&_p]:my-2 [&_ul]:my-0.5 [&_ol]:my-0.5 [&_li]:my-0.5"
+import { RICH_TEXT_STYLES } from "./rich-text-display"
 
 interface RichTextEditorProps {
   content: string
@@ -28,20 +25,8 @@ interface RichTextEditorProps {
   className?: string
 }
 
-interface RichTextDisplayProps {
-  content: string
-  className?: string
-}
-
-// Composant pour afficher le contenu riche formaté
-export function RichTextDisplay({ content, className }: RichTextDisplayProps) {
-  return (
-    <div
-      className={cn(RICH_TEXT_STYLES, className)}
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
-  )
-}
+// Note: RichTextDisplay lives in ./rich-text-display so pages that only render
+// formatted content don't pull the tiptap runtime into their bundle.
 
 // Composant éditeur
 export function RichTextEditor({

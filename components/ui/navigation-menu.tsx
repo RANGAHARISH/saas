@@ -59,7 +59,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  "group inline-flex h-9 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-primary focus:text-primary disabled:pointer-events-none disabled:opacity-50 data-[active=true]:text-primary data-[state=open]:text-primary",
+  "group inline-flex h-9 w-max items-center justify-center rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-copper hover:underline hover:decoration-copper hover:underline-offset-8 focus:text-copper disabled:pointer-events-none disabled:opacity-50 data-[active=true]:bg-copper-soft data-[active=true]:text-espresso data-[state=open]:text-copper",
 )
 
 function NavigationMenuTrigger({
@@ -125,7 +125,7 @@ function NavigationMenuLink({
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
       className={cn(
-        "hover:text-primary focus:text-primary data-[active=true]:text-primary [&_svg:not([class*='text-'])]:text-muted-foreground flex flex-col gap-1 rounded-sm p-2 text-sm transition-colors",
+        "hover:text-copper focus:text-copper data-[active=true]:text-copper [&_svg:not([class*='text-'])]:text-muted-foreground flex flex-col gap-1 rounded-sm p-2 text-sm transition-colors",
         className,
       )}
       {...props}

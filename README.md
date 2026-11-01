@@ -1,5 +1,6 @@
-# Open-Launch
+# SaaSFlock
 
+> SaaS directory built on [Open-Launch](https://github.com/openlaunch-org/Open-Launch.git).
 
 [![License: Open Launch](https://img.shields.io/badge/License-Open_Launch-yellow.svg)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.1-black?logo=next.js)](https://nextjs.org)
@@ -32,7 +33,6 @@
 - [Acknowledgments](#acknowledgments)
 - [Support](#support)
 - [Sponsoring](#sponsoring)
-
 
 ## Sponsors
 

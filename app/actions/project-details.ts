@@ -15,16 +15,33 @@ import {
 import { and, eq, ne, sql } from "drizzle-orm"
 
 import { auth } from "@/lib/auth"
+import { getMockProjectBySlug, isMockMode } from "@/lib/mock-data"
+
+const shouldUseMock = () => isMockMode()
 
 // Get session helper
 async function getSession() {
-  return auth.api.getSession({
-    headers: await headers(),
-  })
+  try {
+    return auth.api.getSession({
+      headers: await headers(),
+    })
+  } catch {
+    return null
+  }
 }
 
 // Get project by slug
 export async function getProjectBySlug(slug: string) {
+  if (shouldUseMock()) {
+    const m = getMockProjectBySlug(slug)
+    if (!m) return null
+    return {
+      ...m,
+      categories: m.categories,
+      upvoteCount: m.upvoteCount,
+      creator: m.creator,
+    }
+  }
   // Get project details - Exclure les projets avec le statut payment_pending
   const [projectData] = await db
     .select()
@@ -78,6 +95,7 @@ export async function getProjectBySlug(slug: string) {
 
 // Check if a user has upvoted a project
 export async function hasUserUpvoted(projectId: string) {
+  if (shouldUseMock()) return false
   const session = await getSession()
 
   if (!session?.user?.id) {
@@ -102,6 +120,7 @@ export async function updateProject(
     categories: string[]
   },
 ) {
+  if (shouldUseMock()) return { success: false, error: "Mock mode: connect Supabase to edit" }
   const session = await getSession()
 
   if (!session?.user?.id) {

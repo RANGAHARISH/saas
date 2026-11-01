@@ -52,7 +52,7 @@ export function PremiumCard({ projects }: PremiumCardProps) {
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <h4 className="group-hover:text-primary line-clamp-2 text-center text-xs font-medium transition-colors sm:text-base">
+                  <h4 className="group-hover:text-copper line-clamp-2 text-center text-xs font-medium transition-colors sm:text-base">
                     Premium Plus Spot
                   </h4>
                 </div>
@@ -77,12 +77,12 @@ export function PremiumCard({ projects }: PremiumCardProps) {
                     {item.name.charAt(0)}
                   </span>
                 )}
-                <div className="bg-primary border-background absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full border-2">
+                <div className="border-background bg-star absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full border-2">
                   <RiStarSFill className="h-3 w-3 text-white" />
                 </div>
               </div>
               <div className="min-w-0">
-                <h4 className="group-hover:text-primary line-clamp-2 text-center text-xs font-medium transition-colors sm:text-base">
+                <h4 className="group-hover:text-copper line-clamp-2 text-center text-xs font-medium transition-colors sm:text-base">
                   {item.name}
                 </h4>
               </div>

@@ -1,11 +1,22 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/navigation"
 
-import { Comments } from "@fuma-comment/react"
-
 import { cn } from "@/lib/utils"
+
+// Client-only : le bundle fuma (useEffectEvent) n'existe pas dans le
+// runtime react-server, donc on l'exclut du build SSR pour un `next build` OK.
+const Comments = dynamic(() => import("@fuma-comment/react").then((m) => m.Comments), {
+  ssr: false,
+  loading: () => (
+    <div className="mt-8 animate-pulse">
+      <div className="mb-4 h-6 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
+      <div className="mb-2.5 h-24 rounded bg-gray-200 dark:bg-gray-700"></div>
+      <div className="h-10 w-20 rounded bg-gray-200 dark:bg-gray-700"></div>
+    </div>
+  ),
+})
 
 interface ProjectCommentsProps {
   projectId: string
@@ -13,25 +24,10 @@ interface ProjectCommentsProps {
 }
 
 export function ProjectComments({ projectId, className }: ProjectCommentsProps) {
-  const [isClient, setIsClient] = useState(false)
   const router = useRouter()
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
 
   const signIn = () => {
     router.push("/sign-in")
-  }
-
-  if (!isClient) {
-    return (
-      <div className={cn("mt-8 animate-pulse", className)}>
-        <div className="mb-4 h-6 w-32 rounded bg-gray-200 dark:bg-gray-700"></div>
-        <div className="mb-2.5 h-24 rounded bg-gray-200 dark:bg-gray-700"></div>
-        <div className="h-10 w-20 rounded bg-gray-200 dark:bg-gray-700"></div>
-      </div>
-    )
   }
 
   return (

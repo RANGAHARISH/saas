@@ -12,13 +12,16 @@ export function DailyRankingBadge({ ranking, className, size = "sm" }: DailyRank
   // Configurer les badges selon le classement
   const badges = {
     1: {
-      bgColor: "bg-primary",
+      bgColor: "bg-copper",
+      textColor: "text-white",
     },
     2: {
-      bgColor: "bg-primary",
+      bgColor: "bg-pine",
+      textColor: "text-white",
     },
     3: {
-      bgColor: "bg-primary",
+      bgColor: "bg-sand",
+      textColor: "text-espresso",
     },
   }
 
@@ -39,7 +42,7 @@ export function DailyRankingBadge({ ranking, className, size = "sm" }: DailyRank
       )}
       title={`Top ${ranking}`}
     >
-      <span className="text-xs font-bold text-white">{ranking}</span>
+      <span className={cn("text-xs font-bold", badge.textColor)}>{ranking}</span>
     </div>
   )
 }

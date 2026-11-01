@@ -216,7 +216,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline gap-2">
             <span className="mt-1 block text-xl font-semibold">{stats.totalUsers}</span>
             {stats.newUsersToday > 0 && (
-              <span className="text-xs text-blue-500">+{stats.newUsersToday} today</span>
+              <span className="text-copper-deep text-xs">+{stats.newUsersToday} today</span>
             )}
           </div>
         </div>
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline gap-2">
             <span className="mt-1 block text-xl font-semibold">{stats.totalLaunches}</span>
             {stats.newLaunchesToday > 0 && (
-              <span className="text-xs text-blue-500">+{stats.newLaunchesToday} today</span>
+              <span className="text-copper-deep text-xs">+{stats.newLaunchesToday} today</span>
             )}
           </div>
         </div>
@@ -240,7 +240,9 @@ export default function AdminDashboard() {
           <div className="flex items-baseline gap-2">
             <span className="mt-1 block text-xl font-semibold">{stats.premiumLaunches}</span>
             {stats.newPremiumLaunchesToday > 0 && (
-              <span className="text-xs text-blue-500">+{stats.newPremiumLaunchesToday} today</span>
+              <span className="text-copper-deep text-xs">
+                +{stats.newPremiumLaunchesToday} today
+              </span>
             )}
           </div>
         </div>
@@ -252,7 +254,7 @@ export default function AdminDashboard() {
           <div className="flex items-baseline gap-2">
             <span className="mt-1 block text-xl font-semibold">{stats.premiumPlusLaunches}</span>
             {stats.newPremiumPlusLaunchesToday > 0 && (
-              <span className="text-xs text-blue-500">
+              <span className="text-copper-deep text-xs">
                 +{stats.newPremiumPlusLaunchesToday} today
               </span>
             )}

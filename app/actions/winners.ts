@@ -4,8 +4,13 @@ import { db } from "@/drizzle/db"
 import { launchStatus, project as projectTable } from "@/drizzle/db/schema"
 import { and, eq, sql } from "drizzle-orm"
 
+import { getMockWinners, isMockMode } from "@/lib/mock-data"
+
+const shouldUseMock = () => isMockMode()
+
 // Récupérer les projets gagnants pour une date spécifique
 export async function getWinnersByDate(date: Date) {
+  if (shouldUseMock()) return getMockWinners() as never
   // Créer le début et la fin de la journée
   const dayStart = new Date(date)
   dayStart.setHours(0, 0, 0, 0)
@@ -39,6 +44,7 @@ export async function getWinnersByDate(date: Date) {
 
 // Vérifier si une date a des gagnants
 export async function dateHasWinners(date: Date) {
+  if (shouldUseMock()) return true
   // Créer le début et la fin de la journée
   const dayStart = new Date(date)
   dayStart.setHours(0, 0, 0, 0)

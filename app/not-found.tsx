@@ -11,8 +11,8 @@ export default function NotFound() {
         <div className="bg-background rounded-xl border p-8 shadow-sm dark:border-zinc-800">
           {/* Icon */}
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full border border-blue-200 bg-blue-50">
-              <span className="text-2xl font-bold text-blue-500">404</span>
+            <div className="border-copper/30 bg-copper-soft flex h-16 w-16 items-center justify-center rounded-full border">
+              <span className="text-copper-deep text-2xl font-bold">404</span>
             </div>
           </div>
 

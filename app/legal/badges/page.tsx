@@ -126,11 +126,11 @@ export default function AttributionBadgesPage() {
                   <strong>Required format:</strong> Visual badge only - text alone is NOT accepted
                 </li>
               </ul>
-              <div className="mt-4 rounded-r-lg border-l-4 border-blue-500 bg-blue-50 p-4 dark:bg-blue-950/20">
-                <p className="mb-2 font-medium text-blue-800 dark:text-blue-200">
+              <div className="border-copper bg-copper-soft mt-4 rounded-r-lg border-l-4 p-4">
+                <p className="text-copper-deep mb-2 font-medium">
                   💡 Implementation Recommendation
                 </p>
-                <p className="text-sm text-blue-700 dark:text-blue-300">
+                <p className="text-copper-deep/80 text-sm">
                   Place the badge in your global footer so it appears automatically on all pages
                   without additional code modifications.
                 </p>

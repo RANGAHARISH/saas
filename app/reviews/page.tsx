@@ -44,12 +44,19 @@ function calculateReadingTime(content: string): string {
 }
 
 async function getReviews() {
-  const reviews = await db.select().from(seoArticle).orderBy(seoArticle.publishedAt)
+  // Local mock mode / no DB: show empty state instead of crashing (500)
+  if (process.env.USE_MOCK_DATA === "true") return []
+  try {
+    const reviews = await db.select().from(seoArticle).orderBy(seoArticle.publishedAt)
 
-  return reviews.map((review) => ({
-    ...review,
-    readingTime: calculateReadingTime(review.content),
-  }))
+    return reviews.map((review) => ({
+      ...review,
+      readingTime: calculateReadingTime(review.content),
+    }))
+  } catch {
+    console.log("[reviews:mock] reviews fallback [] (DB unavailable)")
+    return []
+  }
 }
 
 export default async function ReviewsPage() {
@@ -57,7 +64,7 @@ export default async function ReviewsPage() {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full px-4 py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-foreground mb-4 text-2xl font-bold md:text-3xl">Product Reviews</h1>

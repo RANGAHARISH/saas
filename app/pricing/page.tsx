@@ -80,40 +80,29 @@ function calculateReadingTime(content: string): string {
 }
 
 async function getLatestReviews() {
-  const reviews = await db.select().from(seoArticle).orderBy(desc(seoArticle.publishedAt)).limit(5)
+  // Local mock mode / no DB: return empty list instead of crashing (500)
+  if (process.env.USE_MOCK_DATA === "true") return []
+  try {
+    const reviews = await db
+      .select()
+      .from(seoArticle)
+      .orderBy(desc(seoArticle.publishedAt))
+      .limit(5)
 
-  return reviews.map((review) => ({
-    ...review,
-    readingTime: calculateReadingTime(review.content),
-  }))
+    return reviews.map((review) => ({
+      ...review,
+      readingTime: calculateReadingTime(review.content),
+    }))
+  } catch {
+    console.log("[pricing:mock] seoArticle fallback [] (DB unavailable)")
+    return []
+  }
 }
 
 export default async function PricingPage() {
   const latestReviews = await getLatestReviews()
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8 md:py-12">
-      {/* Domain Rating Badge */}
-      <div className="mb-4 flex justify-center">
-        <a href="https://frogdr.com/open-launch.com?utm_source=open-launch.com" target="_blank">
-          {/* Light mode badge */}
-          <img
-            src="https://frogdr.com/open-launch.com/badge-white-sm.svg?round=1"
-            alt="Monitor your Domain Rating with FrogDR"
-            width="249"
-            height="36"
-            className="h-8 w-auto dark:hidden"
-          />
-          {/* Dark mode badge */}
-          <img
-            src="https://frogdr.com/open-launch.com/badge-dark-sm.svg?round=1"
-            alt="Monitor your Domain Rating with FrogDR"
-            width="249"
-            height="36"
-            className="hidden h-8 w-auto dark:block"
-          />
-        </a>
-      </div>
-
       <div className="mb-4 text-center">
         <h1 className="mb-3 text-2xl font-bold sm:text-3xl">Choose Your Launch Plan</h1>
         <p className="text-muted-foreground mx-auto max-w-2xl text-sm">

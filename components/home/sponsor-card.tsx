@@ -50,7 +50,7 @@ export function SponsorCard({
       target={isInternal ? undefined : "_blank"}
       rel={isInternal ? undefined : "noopener"}
       className={cn(
-        "bg-secondary/70 hover:bg-secondary border-primary block rounded-md border-l-4 px-3 py-2 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors",
+        "bg-secondary hover:bg-accent border-primary block rounded-md border-l-4 px-3 py-2 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-colors",
         className,
       )}
     >
@@ -65,7 +65,9 @@ export function SponsorCard({
             alt={`${finalProps.name} logo`}
             width={48}
             height={48}
-            className="flex-shrink-0 rounded-lg"
+            unoptimized
+            loading="lazy"
+            className="flex-shrink-0 rounded-lg transition-all duration-300"
           />
         ) : null}
         <div className="min-w-0 flex-1">

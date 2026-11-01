@@ -72,23 +72,32 @@ function TrendingDataSkeleton() {
 async function TrendingData({
   filter,
   isAuthenticated,
+  userId,
 }: {
   filter: string
   isAuthenticated: boolean
+  userId: string | null
 }) {
   let projects: ProjectSummary[] = [] // Utiliser le type défini
   let title
 
   if (filter === "today") {
-    projects = await getTodayProjects(PROJECT_LIMITS_VARIABLES.VIEW_ALL_PAGE_TODAY_YESTERDAY_LIMIT)
+    projects = await getTodayProjects(
+      PROJECT_LIMITS_VARIABLES.VIEW_ALL_PAGE_TODAY_YESTERDAY_LIMIT,
+      userId,
+    )
     title = "Today's Launches"
   } else if (filter === "yesterday") {
     projects = await getYesterdayProjects(
       PROJECT_LIMITS_VARIABLES.VIEW_ALL_PAGE_TODAY_YESTERDAY_LIMIT,
+      userId,
     )
     title = "Yesterday's Launches"
   } else {
-    projects = await getMonthBestProjects(PROJECT_LIMITS_VARIABLES.VIEW_ALL_PAGE_MONTH_LIMIT)
+    projects = await getMonthBestProjects(
+      PROJECT_LIMITS_VARIABLES.VIEW_ALL_PAGE_MONTH_LIMIT,
+      userId,
+    )
     title = "Best of the Month"
   }
 
@@ -136,20 +145,21 @@ export default async function TrendingPage({
     headers: await headers(),
   })
   const isAuthenticated = !!session?.user
+  const userId = session?.user?.id ?? null
 
-  const todayProjects = await getTodayProjects()
+  const todayProjects = await getTodayProjects(undefined, userId)
   const ongoingLaunches = todayProjects.filter(
     (project) => project.launchStatus === "ongoing",
   ).length
 
   return (
     <main className="bg-secondary/20">
-      <div className="container mx-auto min-h-screen max-w-6xl px-4 pt-8 pb-12">
+      <div className="min-h-screen w-full px-4 pt-8 pb-12 md:px-8">
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:items-start">
           {/* Contenu principal */}
           <div className="space-y-6 sm:space-y-8 lg:col-span-2">
             <Suspense fallback={<TrendingDataSkeleton />}>
-              <TrendingData filter={filter} isAuthenticated={isAuthenticated} />
+              <TrendingData filter={filter} isAuthenticated={isAuthenticated} userId={userId} />
             </Suspense>
           </div>
 
@@ -176,7 +186,9 @@ export default async function TrendingPage({
                 <Link
                   href="/trending?filter=today"
                   className={`-mx-2 flex items-center gap-2 rounded-md p-2 text-sm transition-colors ${
-                    filter === "today" ? "bg-muted font-medium" : "hover:bg-muted/40"
+                    filter === "today"
+                      ? "bg-copper-soft text-espresso font-medium"
+                      : "hover:bg-muted/40"
                   }`}
                 >
                   Today&apos;s Launches
@@ -184,7 +196,9 @@ export default async function TrendingPage({
                 <Link
                   href="/trending?filter=yesterday"
                   className={`-mx-2 flex items-center gap-2 rounded-md p-2 text-sm transition-colors ${
-                    filter === "yesterday" ? "bg-muted font-medium" : "hover:bg-muted/40"
+                    filter === "yesterday"
+                      ? "bg-copper-soft text-espresso font-medium"
+                      : "hover:bg-muted/40"
                   }`}
                 >
                   Yesterday&apos;s Launches
@@ -192,7 +206,9 @@ export default async function TrendingPage({
                 <Link
                   href="/trending?filter=month"
                   className={`-mx-2 flex items-center gap-2 rounded-md p-2 text-sm transition-colors ${
-                    filter === "month" ? "bg-muted font-medium" : "hover:bg-muted/40"
+                    filter === "month"
+                      ? "bg-copper-soft text-espresso font-medium"
+                      : "hover:bg-muted/40"
                   }`}
                 >
                   This Month&apos;s Best

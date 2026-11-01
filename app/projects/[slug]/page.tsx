@@ -17,7 +17,7 @@ import { format } from "date-fns"
 import { auth } from "@/lib/auth"
 import { getProjectWebsiteRelAttribute } from "@/lib/link-utils"
 import { Button } from "@/components/ui/button"
-import { RichTextDisplay } from "@/components/ui/rich-text-editor"
+import { RichTextDisplay } from "@/components/ui/rich-text-display"
 import { EditButton } from "@/components/project/edit-button"
 import { ProjectComments } from "@/components/project/project-comments"
 import { ProjectImageWithLoader } from "@/components/project/project-image-with-loader"
@@ -105,7 +105,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="mx-auto max-w-6xl px-6">
+      <div className="w-full px-4 md:px-8">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main Content - 2 colonnes */}
           <div className="lg:col-span-2">
@@ -267,14 +267,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
               {/* Scheduled Launch Info */}
               {isScheduled && scheduledDate && (
-                <div className="flex flex-col items-center justify-between gap-2 rounded-lg border border-blue-200 bg-blue-50 p-4 text-blue-800 sm:flex-row sm:items-center sm:gap-3 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-200">
+                <div className="border-copper/40 bg-copper-soft text-copper-deep flex flex-col items-center justify-between gap-2 rounded-[20px] border p-4 sm:flex-row sm:items-center sm:gap-3">
                   <div className="text-center sm:text-left">
                     <p className="font-medium">This project is scheduled for launch</p>
                     <p className="text-sm opacity-90">
                       Launch date: {format(scheduledDate, "EEEE, MMMM d, yyyy")} at 08:00 AM UTC
                     </p>
                   </div>
-                  <div className="rounded-md bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                  <div className="bg-copper rounded-full px-3 py-1 text-sm font-medium text-white">
                     Scheduled
                   </div>
                 </div>
@@ -365,7 +365,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                           className="h-10 w-10 rounded-full"
                         />
                       ) : (
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
+                        <div className="bg-copper-soft text-copper-deep flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium">
                           {projectData.creator.name?.charAt(0) || "U"}
                         </div>
                       )}

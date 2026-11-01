@@ -32,6 +32,9 @@ interface ProjectSectionProps {
   moreHref?: string
   sortByUpvotes?: boolean
   isAuthenticated: boolean
+  // Perf: eager-load the first logo when this section is above the fold (LCP).
+  // Everything else stays lazy (default) so below-the-fold images don't contend.
+  eagerFirstImage?: boolean
 }
 
 export function ProjectSection({
@@ -40,6 +43,7 @@ export function ProjectSection({
   moreHref,
   sortByUpvotes = false,
   isAuthenticated,
+  eagerFirstImage = false,
 }: ProjectSectionProps) {
   const sortedProjects = sortByUpvotes
     ? [...projects].sort((a, b) => (b.upvoteCount ?? 0) - (a.upvoteCount ?? 0))
@@ -97,6 +101,7 @@ export function ProjectSection({
                 categories={project.categories ?? []}
                 isAuthenticated={isAuthenticated}
                 index={index}
+                priority={eagerFirstImage && index === 0}
                 websiteUrl={project.websiteUrl ?? undefined}
               />
             ))}

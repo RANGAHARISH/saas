@@ -7,15 +7,44 @@ import Stripe from "stripe"
 
 import { sendEmail } from "@/lib/email"
 
-const stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const isValid = (v: string | undefined) =>
+  !!v && !v.includes("...") && !v.startsWith("your_") && v.length > 8
 
-export const auth = betterAuth({
+const STRIPE_KEY = process.env.STRIPE_SECRET_KEY
+const STRIPE_WEBHOOK = process.env.STRIPE_WEBHOOK_SECRET
+const hasStripe = isValid(STRIPE_KEY) && isValid(STRIPE_WEBHOOK)
+
+const stripeClient = new Stripe(
+  hasStripe ? STRIPE_KEY! : "sk_test_51MockForLocalDevOnly00000000000000",
+  { apiVersion: "2025-02-24.acacia" },
+)
+
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY
+const hasTurnstile = isValid(TURNSTILE_SECRET)
+
+const ONE_TAP_ID =
+  process.env.NEXT_PUBLIC_ONE_TAP_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+const hasOneTap = isValid(ONE_TAP_ID)
+
+const GOOGLE_ID = process.env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+const GOOGLE_SECRET = process.env.GOOGLE_CLIENT_SECRET
+const hasGoogle = isValid(GOOGLE_ID) && isValid(GOOGLE_SECRET)
+
+const GITHUB_ID = process.env.GITHUB_CLIENT_ID
+const GITHUB_SECRET = process.env.GITHUB_CLIENT_SECRET
+const hasGithub = isValid(GITHUB_ID) && isValid(GITHUB_SECRET)
+
+// En local sans email vérifié, on désactive la vérification pour pouvoir tester
+const isLocal = process.env.NODE_ENV !== "production"
+export const USE_MOCK = process.env.USE_MOCK_DATA === "true"
+
+const realAuth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: !isLocal,
     sendResetPassword: async ({ user, url }) => {
       const html = `
         <p>Hello ${user.name},</p>
@@ -59,14 +88,22 @@ export const auth = betterAuth({
     expiresIn: 86400,
   },
   socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-    },
-    github: {
-      clientId: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
-    },
+    ...(hasGoogle
+      ? {
+          google: {
+            clientId: GOOGLE_ID as string,
+            clientSecret: GOOGLE_SECRET as string,
+          },
+        }
+      : {}),
+    ...(hasGithub
+      ? {
+          github: {
+            clientId: GITHUB_ID as string,
+            clientSecret: GITHUB_SECRET as string,
+          },
+        }
+      : {}),
   },
   trustedOrigins: [
     process.env.NODE_ENV !== "development"
@@ -74,19 +111,59 @@ export const auth = betterAuth({
       : "http://localhost:3000",
   ],
   plugins: [
-    stripe({
-      stripeClient,
-      stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET!,
-      createCustomerOnSignUp: true,
-    }),
-    captcha({
-      provider: "cloudflare-turnstile", // or "google-recaptcha"
-      secretKey: process.env.TURNSTILE_SECRET_KEY!,
-      endpoints: ["/sign-up/email", "/sign-in/email", "/forget-password"],
-    }),
-    oneTap({
-      clientId: process.env.NEXT_PUBLIC_ONE_TAP_CLIENT_ID!,
-    }),
+    ...(hasStripe
+      ? [
+          stripe({
+            stripeClient,
+            stripeWebhookSecret: STRIPE_WEBHOOK!,
+            createCustomerOnSignUp: true,
+          }),
+        ]
+      : []),
+    ...(hasTurnstile
+      ? [
+          captcha({
+            provider: "cloudflare-turnstile",
+            secretKey: TURNSTILE_SECRET!,
+            endpoints: ["/sign-up/email", "/sign-in/email", "/forget-password"],
+          }),
+        ]
+      : []),
+    ...(hasOneTap
+      ? [
+          oneTap({
+            clientId: ONE_TAP_ID!,
+          }),
+        ]
+      : []),
     admin({}),
   ],
+})
+
+// Wrapper résilient : en mode mock ou si la DB est absente, getSession retourne null
+// au lieu de crasher les pages publiques (/, /trending, /projects/[slug]...)
+export const auth = new Proxy(realAuth, {
+  get(target, prop, receiver) {
+    if (prop === "api") {
+      const api = Reflect.get(target, prop, receiver) as Record<string, unknown>
+      return new Proxy(api, {
+        get(apiTarget, apiProp) {
+          if (apiProp === "getSession") {
+            return async (...args: unknown[]) => {
+              if (USE_MOCK) return null
+              try {
+                const fn = Reflect.get(apiTarget, apiProp) as (...a: unknown[]) => Promise<unknown>
+                return await fn(...args)
+              } catch {
+                console.log("[auth:mock] getSession fallback null (DB unavailable)")
+                return null
+              }
+            }
+          }
+          return Reflect.get(apiTarget, apiProp)
+        },
+      })
+    }
+    return Reflect.get(target, prop, receiver)
+  },
 })

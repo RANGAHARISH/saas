@@ -40,14 +40,14 @@ export default async function Nav() {
   const user = session?.user
 
   return (
-    <nav className="bg-background/95 border-border/40 sticky top-0 z-50 border-b backdrop-blur-sm">
-      <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+    <nav className="border-pine-deep/60 bg-pine/95 text-cream sticky top-0 z-50 border-b backdrop-blur-sm">
+      <div className="flex h-16 w-full items-center justify-between px-4 md:px-8">
         {/* Logo */}
         <div className="flex items-center gap-8">
           <Link href="/" className="font-heading flex items-center">
             <span className="font-heading flex items-center text-lg font-bold">
-              <img src="/logo.svg" alt="logo" className="mr-1 h-6 w-6" />
-              Open-Launch
+              <img src="/logo.svg" alt="SaaS Flock logo" className="mr-1.5 h-6 w-auto" />
+              SaaS Flock<span className="text-copper">.</span>
             </span>
           </Link>
 
@@ -63,14 +63,14 @@ export default async function Nav() {
           {session ? (
             <UserNav user={user as User} />
           ) : (
-            <>
+            <div className="flex items-center gap-1">
               <Button variant="ghost" size="sm" asChild>
                 <Link href="/sign-in">Sign in</Link>
               </Button>
-              <Button size="sm" asChild>
+              <Button variant="secondary" size="sm" asChild>
                 <Link href="/sign-up">Sign up</Link>
               </Button>
-            </>
+            </div>
           )}
         </div>
 
@@ -78,7 +78,7 @@ export default async function Nav() {
         <div className="flex items-center md:hidden">
           {session && <UserNav user={user as User} />}
           {!session && (
-            <Button variant="default" size="sm" asChild className="mr-2">
+            <Button variant="secondary" size="sm" asChild className="mr-2">
               <Link href="/sign-in">
                 <RiLoginBoxLine className="h-4 w-4" />
                 Sign in
