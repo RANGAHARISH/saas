@@ -39,7 +39,7 @@ export async function generateMetadata({
 
   if (process.env.USE_MOCK_DATA === "true") {
     return {
-      title: "Article not found | Open Launch",
+      title: "Article not found | SaaSFlock",
       description: "The article you're looking for doesn't exist or has been removed.",
     }
   }
@@ -49,7 +49,7 @@ export async function generateMetadata({
     article = await db.select().from(blogArticle).where(eq(blogArticle.slug, slug)).limit(1)
   } catch {
     return {
-      title: "Article not found | Open Launch",
+      title: "Article not found | SaaSFlock",
       description: "The article you're looking for doesn't exist or has been removed.",
     }
   }
@@ -57,25 +57,25 @@ export async function generateMetadata({
   const { title, description, metaTitle, metaDescription } = article[0]
 
   return {
-    title: metaTitle || `${title} | Open Launch`,
+    title: metaTitle || `${title} | SaaSFlock`,
     description: metaDescription || description,
     keywords: "blog, insights, tutorials, product launch, entrepreneurship, technology, startup",
-    authors: [{ name: article[0].author || "Open Launch Team" }],
+    authors: [{ name: article[0].author || "SaaSFlock Team" }],
     category: "Technology",
     openGraph: {
-      title: metaTitle || `${title} | Open Launch`,
+      title: metaTitle || `${title} | SaaSFlock`,
       description: metaDescription || description,
       type: "article",
       publishedTime: article[0].publishedAt.toISOString(),
-      siteName: "Open Launch",
+      siteName: "SaaSFlock",
       locale: "en_US",
     },
     twitter: {
       card: "summary_large_image",
-      title: metaTitle || `${title} | Open Launch`,
+      title: metaTitle || `${title} | SaaSFlock`,
       description: metaDescription || description,
-      creator: "@openlaunch",
-      site: "@openlaunch",
+      creator: "@Ranga_Harish29",
+      site: "@Ranga_Harish29",
     },
     alternates: {
       canonical: `/blog/${slug}`,

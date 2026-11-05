@@ -39,7 +39,7 @@ export async function generateMetadata({
 
   if (process.env.USE_MOCK_DATA === "true") {
     return {
-      title: "Review not found | Open Launch",
+      title: "Review not found | SaaSFlock",
       description: "The review you're looking for doesn't exist or has been removed.",
     }
   }
@@ -49,7 +49,7 @@ export async function generateMetadata({
     article = await db.select().from(seoArticle).where(eq(seoArticle.slug, slug)).limit(1)
   } catch {
     return {
-      title: "Review not found | Open Launch",
+      title: "Review not found | SaaSFlock",
       description: "The review you're looking for doesn't exist or has been removed.",
     }
   }
@@ -57,22 +57,22 @@ export async function generateMetadata({
   const { title, description, metaTitle, metaDescription } = article[0]
 
   return {
-    title: metaTitle || `${title} | Open Launch`,
+    title: metaTitle || `${title} | SaaSFlock`,
     description: metaDescription || description,
     keywords: "review, product review, analysis, evaluation",
-    authors: [{ name: "Open Launch Team" }],
+    authors: [{ name: "SaaSFlock Team" }],
     category: "Technology",
     openGraph: {
-      title: metaTitle || `${title} | Open Launch`,
+      title: metaTitle || `${title} | SaaSFlock`,
       description: metaDescription || description,
       type: "article",
       publishedTime: article[0].publishedAt.toISOString(),
-      siteName: "Open Launch",
+      siteName: "SaaSFlock",
       locale: "en_US",
     },
     twitter: {
       card: "summary_large_image",
-      title: metaTitle || `${title} | Open Launch`,
+      title: metaTitle || `${title} | SaaSFlock`,
       description: metaDescription || description,
       creator: "@openlaunch",
       site: "@openlaunch",

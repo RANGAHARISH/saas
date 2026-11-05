@@ -46,8 +46,8 @@ export default async function Nav() {
         <div className="flex items-center gap-8">
           <Link href="/" className="font-heading flex items-center">
             <span className="font-heading flex items-center text-lg font-bold">
-              <img src="/logo.svg" alt="SaaS Flock logo" className="mr-1.5 h-6 w-auto" />
-              SaaS Flock<span className="text-copper">.</span>
+              <img src="/logo.svg" alt="SaaSFlock logo" className="mr-1.5 h-6 w-auto" />
+              SaaSFlock<span className="text-copper">.</span>
             </span>
           </Link>
 

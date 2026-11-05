@@ -107,7 +107,7 @@ const realAuth = betterAuth({
   },
   trustedOrigins: [
     process.env.NODE_ENV !== "development"
-      ? "https://www.open-launch.com"
+      ? process.env.NEXT_PUBLIC_URL || "https://saasflock.com"
       : "http://localhost:3000",
   ],
   plugins: [

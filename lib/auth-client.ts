@@ -9,10 +9,10 @@ const isValidClient = (v: string | undefined) =>
   !!v && !v.includes("...") && !v.startsWith("your_") && v.length > 8
 
 export const authClient = createAuthClient({
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.NEXT_PUBLIC_URL,
   trustedOrigins: [
     process.env.NODE_ENV !== "development"
-      ? "https://www.open-launch.com"
+      ? process.env.NEXT_PUBLIC_URL || "https://saasflock.com"
       : "http://localhost:3000",
   ],
   plugins: [

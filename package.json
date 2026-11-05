@@ -2,9 +2,9 @@
   "name": "saasflock",
   "version": "0.1.0",
   "private": true,
-  "description": "> SaaS directory built on [Open-Launch](https://github.com/openlaunch-org/Open-Launch.git).",
+  "description": "SaaSFlock: SaaS product discovery, maintained by Ranga Harish. Derived from Open-Launch.",
   "keywords": [],
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE",
   "author": "",
   "type": "module",
   "main": "index.js",
@@ -178,5 +178,8 @@
     "sort-package-json": "^3.2.1",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }

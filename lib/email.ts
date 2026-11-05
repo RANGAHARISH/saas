@@ -26,7 +26,7 @@ export async function sendEmail(payload: EmailPayload) {
 
   try {
     const data = await resend.emails.send({
-      from: "Open-Launch <noreply@open-launch.com>",
+      from: process.env.RESEND_FROM_EMAIL || "SaaSFlock <contact@saasflock.com>",
       to,
       subject,
       html,

@@ -54,10 +54,10 @@ export async function generateMetadata(
   const previousImages = (await parent).openGraph?.images || []
 
   return {
-    title: `${projectData.name} | Open-Launch`,
+    title: `${projectData.name} | SaaSFlock`,
     description: stripHtml(projectData.description),
     openGraph: {
-      title: `${projectData.name} on Open-Launch`,
+      title: `${projectData.name} on SaaSFlock`,
       description: stripHtml(projectData.description),
       images: [
         projectData.productImage || projectData.coverImageUrl || projectData.logoUrl,
@@ -66,7 +66,7 @@ export async function generateMetadata(
     },
     twitter: {
       card: "summary_large_image",
-      title: `${projectData.name} on Open-Launch`,
+      title: `${projectData.name} on SaaSFlock`,
       description: stripHtml(projectData.description),
       images: [projectData.productImage || projectData.logoUrl],
     },

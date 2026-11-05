@@ -25,7 +25,7 @@ const legalLinks = [
 // Liens pour la nouvelle colonne "Connect"
 const connectLinkItems = [
   {
-    href: "https://github.com/drdruide/open-launch",
+    href: "https://github.com/RANGAHARISH/saas",
     icon: RiGithubFill,
     label: "GitHub",
   },
@@ -45,12 +45,12 @@ export default function FooterSection() {
           <div className="flex flex-col items-start text-left md:col-span-4 lg:col-span-4">
             <Link href="/" className="font-heading mb-3 flex items-center">
               <span className="font-heading flex items-center text-lg font-bold">
-                <img src="/logo.svg" alt="SaaS Flock logo" className="mr-1.5 h-6 w-auto" />
-                SaaS Flock<span className="text-copper">.</span>
+                <img src="/logo.svg" alt="SaaSFlock logo" className="mr-1.5 h-6 w-auto" />
+                SaaSFlock<span className="text-copper">.</span>
               </span>
             </Link>
             <p className="text-cream/60 text-sm">
-              © {new Date().getFullYear()} SaaS Flock. All rights reserved. Made by{" "}
+              © {new Date().getFullYear()} SaaSFlock. All rights reserved. Made by{" "}
               <Link
                 href="https://x.com/Ranga_Harish29"
                 target="_blank"
@@ -141,6 +141,18 @@ export default function FooterSection() {
           </div>
         </div>
       </div>
+      <a
+        href="https://open-launch.com"
+        className="mx-auto mt-6 block w-[150px]"
+        title="Powered by Open-Launch"
+      >
+        <img
+          src="/images/badges/powered-by-dark.svg"
+          alt="Powered by Open-Launch"
+          width={150}
+          height={44}
+        />
+      </a>
     </footer>
   )
 }
