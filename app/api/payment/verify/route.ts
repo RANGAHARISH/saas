@@ -6,9 +6,14 @@ import { eq } from "drizzle-orm"
 import Stripe from "stripe"
 
 // Initialiser le client Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripeKey = process.env.STRIPE_SECRET_KEY
 
 export async function GET(request: Request) {
+  if (!stripeKey) {
+    return NextResponse.json({ error: "Payments are not configured" }, { status: 503 })
+  }
+  const stripe = new Stripe(stripeKey)
+
   try {
     // Récupérer l'ID de session des paramètres de requête
     const { searchParams } = new URL(request.url)

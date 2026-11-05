@@ -7,10 +7,15 @@ import { eq, sql } from "drizzle-orm"
 import Stripe from "stripe"
 
 // Initialiser le client Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+const stripeKey = process.env.STRIPE_SECRET_KEY
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
 export async function POST(request: Request) {
+  if (!stripeKey || !webhookSecret) {
+    return NextResponse.json({ error: "Payments are not configured" }, { status: 503 })
+  }
+  const stripe = new Stripe(stripeKey)
+
   try {
     const body = await request.text()
     const signature = request.headers.get("stripe-signature") as string
