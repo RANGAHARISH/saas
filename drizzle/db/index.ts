@@ -20,8 +20,6 @@ const pool = new Pool({
   // database is unreachable or a query stalls. Values are generous on purpose.
   connectionTimeoutMillis: 10_000,
   idleTimeoutMillis: 30_000,
-  // Abort runaway queries server-side (30s) without changing any logic.
-  options: "-c statement_timeout=30000",
 })
 
 export const db = drizzle(pool, {
