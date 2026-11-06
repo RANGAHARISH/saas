@@ -9,7 +9,7 @@ import { RiGithubFill, RiGoogleFill } from "@remixicon/react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { isOneTapEnabled, oneTap, signIn, signUp } from "@/lib/auth-client"
+import { isOneTapEnabled, isTurnstileEnabled, oneTap, signIn, signUp } from "@/lib/auth-client"
 import { SignUpFormData, signUpSchema } from "@/lib/validations/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -52,7 +52,7 @@ export function SignUpForm() {
   }
 
   const handleSignUp = async (data: SignUpFormData) => {
-    if (!turnstileToken) {
+    if (isTurnstileEnabled && !turnstileToken) {
       setGeneralError("Please complete the security verification")
       return
     }
@@ -64,7 +64,7 @@ export function SignUpForm() {
       callbackURL: "/verify-email/success",
       fetchOptions: {
         headers: {
-          "x-captcha-response": turnstileToken,
+          ...(turnstileToken ? { "x-captcha-response": turnstileToken } : {}),
         },
       },
     }
@@ -164,13 +164,15 @@ export function SignUpForm() {
                 )}
               </div>
 
-              <TurnstileCaptcha onVerify={(token) => setTurnstileToken(token)} />
+              {isTurnstileEnabled && (
+                <TurnstileCaptcha onVerify={(token) => setTurnstileToken(token)} />
+              )}
 
               {generalError && <p className="text-center text-sm text-red-500">{generalError}</p>}
               <Button
                 type="submit"
                 className="w-full cursor-pointer"
-                disabled={loadingButtons.email || !turnstileToken}
+                disabled={loadingButtons.email || (isTurnstileEnabled && !turnstileToken)}
               >
                 {loadingButtons.email ? "Creating account..." : "Create account"}
               </Button>
