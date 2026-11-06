@@ -8,6 +8,11 @@ const ONE_TAP_CLIENT_ID =
 const isValidClient = (v: string | undefined) =>
   !!v && !v.includes("...") && !v.startsWith("your_") && v.length > 8
 
+export const isGoogleAuthEnabled =
+  !!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID &&
+  !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID.includes("...") &&
+  !process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID.startsWith("your_")
+
 export const isTurnstileEnabled =
   !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY &&
   !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY.includes("...") &&

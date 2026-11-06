@@ -9,7 +9,14 @@ import { RiGithubFill, RiGoogleFill } from "@remixicon/react"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
-import { isOneTapEnabled, isTurnstileEnabled, oneTap, signIn, signUp } from "@/lib/auth-client"
+import {
+  isGoogleAuthEnabled,
+  isOneTapEnabled,
+  isTurnstileEnabled,
+  oneTap,
+  signIn,
+  signUp,
+} from "@/lib/auth-client"
 import { SignUpFormData, signUpSchema } from "@/lib/validations/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -108,16 +115,18 @@ export function SignUpForm() {
         </CardHeader>
         <CardContent className="px-4 pb-6 sm:px-6">
           <form onSubmit={handleSubmit(handleSignUp)} className="flex flex-col gap-4">
-            <Button
-              className="w-full cursor-pointer"
-              variant="outline"
-              type="button"
-              onClick={() => handleLogin("google")}
-              disabled={loadingButtons.google}
-            >
-              <RiGoogleFill className="me-1" size={16} aria-hidden="true" />
-              {loadingButtons.google ? "Loading..." : "Login with Google"}
-            </Button>
+            {isGoogleAuthEnabled && (
+              <Button
+                className="w-full cursor-pointer"
+                variant="outline"
+                type="button"
+                onClick={() => handleLogin("google")}
+                disabled={loadingButtons.google}
+              >
+                <RiGoogleFill className="me-1" size={16} aria-hidden="true" />
+                {loadingButtons.google ? "Loading..." : "Login with Google"}
+              </Button>
+            )}
             <Button
               className="w-full cursor-pointer"
               variant="outline"
