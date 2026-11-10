@@ -5,15 +5,18 @@ import { Pool } from "pg"
 
 import * as schema from "./schema"
 
-const connectionString = process.env.DATABASE_URL!
+// Next.js may import database modules while collecting page data during a
+// build, when runtime environment variables are not available. Keep pool
+// construction safe until a database connection is actually requested.
+const connectionString = process.env.DATABASE_URL
 
 const needsSSL =
-  connectionString.includes("supabase.co") ||
-  connectionString.includes("pooler.supabase") ||
-  connectionString.includes("sslmode=require")
+  connectionString?.includes("supabase.co") ||
+  connectionString?.includes("pooler.supabase") ||
+  connectionString?.includes("sslmode=require")
 
 const pool = new Pool({
-  connectionString,
+  ...(connectionString ? { connectionString } : {}),
   ...(needsSSL ? { ssl: { rejectUnauthorized: false } } : {}),
   max: 10,
   // Perf/robustness (audit L1): fail fast instead of hanging forever when the
