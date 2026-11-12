@@ -15,8 +15,20 @@ const needsSSL =
   connectionString?.includes("pooler.supabase") ||
   connectionString?.includes("sslmode=require")
 
+// node-postgres reparses connection-string SSL options after merging the
+// explicit `ssl` object, so `sslmode=require` overrides `rejectUnauthorized`.
+// Keep TLS enabled with the Supabase settings below while removing that
+// duplicate URL option before handing the connection string to pg.
+const poolConnectionString = (() => {
+  if (!connectionString || !needsSSL) return connectionString
+
+  const url = new URL(connectionString)
+  url.searchParams.delete("sslmode")
+  return url.toString()
+})()
+
 const pool = new Pool({
-  ...(connectionString ? { connectionString } : {}),
+  ...(poolConnectionString ? { connectionString: poolConnectionString } : {}),
   ...(needsSSL ? { ssl: { rejectUnauthorized: false } } : {}),
   max: 10,
   // Perf/robustness (audit L1): fail fast instead of hanging forever when the
