@@ -32,10 +32,10 @@ export default async function Home() {
 
   return (
     <main className="bg-muted/30 min-h-screen">
-      <div className="w-full px-4 pt-6 pb-12 md:px-8 md:pt-8">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:items-start">
+      <div className="site-container pt-6 pb-12 md:pt-8">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-3 xl:items-start xl:gap-12">
           {/* Contenu principal */}
-          <div className="space-y-6 sm:space-y-8 lg:col-span-2">
+          <div className="min-w-0 space-y-6 sm:space-y-8 xl:col-span-2">
             {/* Hero */}
             <HeroSection visitorsThisMonth={null} onlineNow={onlineNow} />
 
@@ -65,7 +65,7 @@ export default async function Home() {
           </div>
 
           {/* Sidebar */}
-          <div className="top-24">
+          <div className="min-w-0 xl:top-24">
             {/* Domain rating badge */}
             <div className="pt-0 pb-4">
               <DrBadge domain="saasflock.com" score={58} />

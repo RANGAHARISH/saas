@@ -245,7 +245,7 @@ export default async function CategoriesPage({
 
   return (
     <main className="bg-secondary/20">
-      <div className="min-h-screen w-full px-4 pt-8 pb-12 md:px-8">
+      <div className="site-container min-h-screen pt-6 pb-12 sm:pt-8">
         <div className="mb-6 flex flex-col">
           <h1 className="text-2xl font-bold">Categories</h1>
 
@@ -256,8 +256,8 @@ export default async function CategoriesPage({
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:items-start">
-          <div className="space-y-6 sm:space-y-8 lg:col-span-2">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-3 xl:items-start xl:gap-12">
+          <div className="min-w-0 space-y-6 sm:space-y-8 xl:col-span-2">
             <Suspense fallback={<CategoryDataSkeleton />}>
               {selectedCategoryId ? (
                 <CategoryData categoryId={selectedCategoryId} sort={sortParam} page={pageParam} />
@@ -269,7 +269,7 @@ export default async function CategoriesPage({
             </Suspense>
           </div>
 
-          <div className="top-24 hidden lg:block">
+          <div className="top-24 hidden min-w-0 xl:block">
             <div className="space-y-3 py-5 pt-0">
               <div className="flex items-center justify-between">
                 <h3 className="flex items-center gap-2 font-semibold">Browse Categories</h3>

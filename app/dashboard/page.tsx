@@ -74,7 +74,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] py-6 sm:py-8">
-      <div className="w-full px-4 md:px-8">
+      <div className="site-container">
         {/* Dashboard Header */}
         <div className="mb-8">
           <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
@@ -82,11 +82,13 @@ export default async function Dashboard() {
               <h1 className="font-heading text-2xl font-bold sm:text-3xl">Dashboard</h1>
               <p className="text-muted-foreground">Welcome, {session?.user?.name || "User"}</p>
             </div>
-            <div className="flex gap-2">
-              <Button variant="secondary" asChild>
-                <Link href="/">Explore Launches</Link>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+              <Button variant="secondary" asChild className="w-full sm:w-auto">
+                <Link href="/" className="whitespace-nowrap">
+                  Explore Launches
+                </Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="w-full sm:w-auto">
                 <Link
                   href="/projects/submit"
                   className="flex w-full items-center justify-center gap-2 sm:w-auto"
@@ -100,9 +102,9 @@ export default async function Dashboard() {
         </div>
 
         {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-3">
           {/* Left Column - My Projects */}
-          <div className="space-y-6 lg:col-span-2">
+          <div className="min-w-0 space-y-6 xl:col-span-2">
             <Card className="border dark:border-zinc-800">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">

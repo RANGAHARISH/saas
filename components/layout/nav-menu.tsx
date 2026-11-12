@@ -18,10 +18,10 @@ interface NavMenuProps {
 
 export function NavMenu({ showDashboard = true }: NavMenuProps) {
   return (
-    <NavigationMenu className="hidden md:flex">
-      <NavigationMenuList className="gap-1">
+    <NavigationMenu className="hidden xl:flex">
+      <NavigationMenuList className="gap-0">
         <NavigationMenuItem>
-          <NavigationMenuTrigger className="h-9 cursor-pointer px-3 text-sm">
+          <NavigationMenuTrigger className="h-9 cursor-pointer px-2 text-sm">
             Explore
           </NavigationMenuTrigger>
           <NavigationMenuContent>
@@ -87,7 +87,7 @@ export function NavMenu({ showDashboard = true }: NavMenuProps) {
             <NavigationMenuLink asChild>
               <Link
                 href="/dashboard"
-                className={`${navigationMenuTriggerStyle()} h-9 px-3 text-sm`}
+                className={`${navigationMenuTriggerStyle()} h-9 px-2 text-sm`}
               >
                 Dashboard
               </Link>
@@ -99,7 +99,7 @@ export function NavMenu({ showDashboard = true }: NavMenuProps) {
           <NavigationMenuLink asChild>
             <Link
               href="/projects/submit"
-              className={`${navigationMenuTriggerStyle()} h-9 px-3 text-sm`}
+              className={`${navigationMenuTriggerStyle()} h-9 px-2 text-sm`}
             >
               Submit Project
             </Link>
@@ -108,7 +108,7 @@ export function NavMenu({ showDashboard = true }: NavMenuProps) {
 
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/pricing" className={`${navigationMenuTriggerStyle()} h-9 px-3 text-sm`}>
+            <Link href="/pricing" className={`${navigationMenuTriggerStyle()} h-9 px-2 text-sm`}>
               Pricing
             </Link>
           </NavigationMenuLink>
@@ -116,7 +116,7 @@ export function NavMenu({ showDashboard = true }: NavMenuProps) {
 
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
-            <Link href="/sponsors" className={`${navigationMenuTriggerStyle()} h-9 px-3 text-sm`}>
+            <Link href="/sponsors" className={`${navigationMenuTriggerStyle()} h-9 px-2 text-sm`}>
               Sponsors
             </Link>
           </NavigationMenuLink>

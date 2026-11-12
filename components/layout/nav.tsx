@@ -41,12 +41,12 @@ export default async function Nav() {
 
   return (
     <nav className="border-pine-deep/60 bg-pine/95 text-cream sticky top-0 z-50 border-b backdrop-blur-sm">
-      <div className="flex h-16 w-full items-center justify-between px-4 md:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1760px] items-center justify-between gap-3 px-3 sm:px-5 lg:px-8">
         {/* Logo */}
-        <div className="flex items-center gap-8">
+        <div className="flex min-w-0 items-center gap-2 xl:gap-6">
           <Link href="/" className="font-heading flex items-center">
-            <span className="font-heading flex items-center text-lg font-bold">
-              <img src="/logo.svg" alt="SaaSFlock logo" className="mr-1.5 h-6 w-auto" />
+            <span className="font-heading flex items-center text-base font-bold whitespace-nowrap sm:text-lg">
+              <img src="/logo.svg" alt="SaaSFlock logo" className="mr-1.5 h-6 w-auto shrink-0" />
               SaaSFlock<span className="text-copper">.</span>
             </span>
           </Link>
@@ -56,7 +56,7 @@ export default async function Nav() {
         </div>
 
         {/* Version Desktop - Recherche et actions */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden shrink-0 items-center gap-2 xl:flex">
           {session && <SearchCommand />}
 
           <ThemeToggle />
@@ -75,7 +75,7 @@ export default async function Nav() {
         </div>
 
         {/* Version Mobile - Menu Drawer */}
-        <div className="flex items-center md:hidden">
+        <div className="flex shrink-0 items-center xl:hidden">
           {session && <UserNav user={user as User} />}
           {!session && (
             <Button variant="secondary" size="sm" asChild className="mr-2">

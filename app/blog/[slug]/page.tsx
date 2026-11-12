@@ -120,7 +120,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="w-full px-4 py-8 sm:px-6 lg:px-8">
+      <div className="site-container py-6 sm:py-8">
         {/* Back Button */}
         <div className="mb-8">
           <Link
@@ -132,9 +132,9 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-10">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-10">
           {/* Main Content */}
-          <div className="lg:col-span-7">
+          <div className="min-w-0 xl:col-span-7">
             <article>
               {/* Article Header */}
               <header className="mb-8">
@@ -197,7 +197,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-3">
+          <div className="min-w-0 xl:col-span-3">
             <div className="sticky top-20 space-y-4">
               {/* Table of Contents */}
               <TableOfContents />

@@ -81,7 +81,7 @@ export default function RootLayout({
         >
           <div className="flex min-h-dvh flex-col">
             <Nav />
-            <main className="flex-grow">{children}</main>
+            <main className="min-w-0 flex-grow">{children}</main>
             <Footer />
           </div>
         </ThemeProvider>

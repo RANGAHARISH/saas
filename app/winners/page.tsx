@@ -70,10 +70,10 @@ export default async function WinnersPage({
 
   return (
     <main className="bg-secondary/20 min-h-screen">
-      <div className="w-full px-4 pt-8 pb-12 md:px-8">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3 md:items-start">
+      <div className="site-container pt-6 pb-12 sm:pt-8">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-3 xl:items-start">
           {/* Contenu principal */}
-          <div className="md:col-span-2">
+          <div className="min-w-0 xl:col-span-2">
             <div className="mb-6">
               <div className="mb-6 flex items-center justify-between">
                 <h1 className="px-3 text-xl font-bold sm:px-4 sm:text-2xl">Daily Winners</h1>

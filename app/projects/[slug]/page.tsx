@@ -105,10 +105,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   return (
     <div className="bg-background min-h-screen">
-      <div className="w-full px-4 md:px-8">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="site-container">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-3">
           {/* Main Content - 2 colonnes */}
-          <div className="lg:col-span-2">
+          <div className="min-w-0 xl:col-span-2">
             {/* Modern Clean Header */}
             <div className="py-6">
               {/* Version Desktop */}

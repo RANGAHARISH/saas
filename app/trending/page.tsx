@@ -154,10 +154,10 @@ export default async function TrendingPage({
 
   return (
     <main className="bg-secondary/20">
-      <div className="min-h-screen w-full px-4 pt-8 pb-12 md:px-8">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:items-start">
+      <div className="site-container min-h-screen pt-6 pb-12 sm:pt-8">
+        <div className="grid min-w-0 grid-cols-1 gap-8 xl:grid-cols-3 xl:items-start xl:gap-12">
           {/* Contenu principal */}
-          <div className="space-y-6 sm:space-y-8 lg:col-span-2">
+          <div className="min-w-0 space-y-6 sm:space-y-8 xl:col-span-2">
             <Suspense fallback={<TrendingDataSkeleton />}>
               <TrendingData filter={filter} isAuthenticated={isAuthenticated} userId={userId} />
             </Suspense>

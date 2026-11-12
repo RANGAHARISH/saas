@@ -181,9 +181,28 @@ div[role="dialog"],
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    scroll-padding-top: 5rem;
+  }
   body {
     @apply bg-background text-foreground;
   }
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+  }
+  pre,
+  code {
+    overflow-wrap: anywhere;
+  }
+}
+
+.site-container {
+  width: 100%;
+  max-width: 1760px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 2.5rem);
 }
 
 /* Styles personnalisés — Cream / Pine / Copper */
