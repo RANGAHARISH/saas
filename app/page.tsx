@@ -12,7 +12,6 @@ import { SponsorCards } from "@/components/shared/sponsor-cards"
 import { getMonthBestProjects, getTodayProjects, getYesterdayProjects } from "@/app/actions/home"
 
 export default async function Home() {
-  // Données mock en parallèle — 1 seul round-trip au lieu de 7 séquentiels
   const reqHeaders = await headers()
   // Perf: session is fetched once here and its user id is passed down so the
   // data actions skip their own redundant session lookups (audit H2).
@@ -20,11 +19,21 @@ export default async function Home() {
     user?: { id?: string }
   } | null
   const userId = session?.user?.id ?? null
-  const [todayProjects, yesterdayProjects, monthProjects] = await Promise.all([
-    getTodayProjects(PROJECT_LIMITS_VARIABLES.TODAY_LIMIT, userId),
-    getYesterdayProjects(PROJECT_LIMITS_VARIABLES.YESTERDAY_LIMIT, userId),
-    getMonthBestProjects(PROJECT_LIMITS_VARIABLES.MONTH_LIMIT, userId),
-  ])
+  // pg otherwise defaults to localhost, which has no database on Vercel.
+  const canLoadProjects = process.env.DATABASE_URL?.trim() || process.env.USE_MOCK_DATA === "true"
+  const projects = canLoadProjects
+    ? await Promise.all([
+        getTodayProjects(PROJECT_LIMITS_VARIABLES.TODAY_LIMIT, userId),
+        getYesterdayProjects(PROJECT_LIMITS_VARIABLES.YESTERDAY_LIMIT, userId),
+        getMonthBestProjects(PROJECT_LIMITS_VARIABLES.MONTH_LIMIT, userId),
+      ]).catch((error: unknown) => {
+        console.error(
+          "[home] Unable to load projects. Check DATABASE_URL and database migrations.",
+          error,
+        )
+        return null
+      })
+    : null
 
   // Stable-ish "online now" figure that rotates daily (no fake live socket needed)
   const now = new Date()
@@ -39,29 +48,43 @@ export default async function Home() {
             {/* Hero */}
             <HeroSection visitorsThisMonth={null} onlineNow={onlineNow} />
 
-            <ProjectSection
-              title="Top Projects Launching Today"
-              projects={todayProjects}
-              sortByUpvotes={true}
-              isAuthenticated={!!session?.user}
-              eagerFirstImage={true}
-            />
+            {projects ? (
+              <>
+                <ProjectSection
+                  title="Top Projects Launching Today"
+                  projects={projects[0]}
+                  sortByUpvotes={true}
+                  isAuthenticated={!!session?.user}
+                  eagerFirstImage={true}
+                />
 
-            <ProjectSection
-              title="Yesterday's Launches"
-              projects={yesterdayProjects}
-              moreHref="/trending?filter=yesterday"
-              sortByUpvotes={true}
-              isAuthenticated={!!session?.user}
-            />
+                <ProjectSection
+                  title="Yesterday's Launches"
+                  projects={projects[1]}
+                  moreHref="/trending?filter=yesterday"
+                  sortByUpvotes={true}
+                  isAuthenticated={!!session?.user}
+                />
 
-            <ProjectSection
-              title="This Month's Best"
-              projects={monthProjects}
-              moreHref="/trending?filter=month"
-              sortByUpvotes={true}
-              isAuthenticated={!!session?.user}
-            />
+                <ProjectSection
+                  title="This Month's Best"
+                  projects={projects[2]}
+                  moreHref="/trending?filter=month"
+                  sortByUpvotes={true}
+                  isAuthenticated={!!session?.user}
+                />
+              </>
+            ) : (
+              <section role="status" className="bg-background rounded-xl border p-6">
+                <h2 className="text-lg font-semibold">Projects are temporarily unavailable</h2>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  We couldn&apos;t load the latest launches. Please try again shortly.
+                </p>
+                <a href="/" className="mt-4 inline-block text-sm font-medium underline">
+                  Try again
+                </a>
+              </section>
+            )}
           </div>
 
           {/* Sidebar */}

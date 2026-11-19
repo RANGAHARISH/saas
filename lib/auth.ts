@@ -145,13 +145,19 @@ const realAuth = betterAuth({
 export const auth = new Proxy(realAuth, {
   get(target, prop, receiver) {
     if (prop === "api") {
-      const api = Reflect.get(target, prop, receiver) as Record<string, unknown>
-      return new Proxy(api, {
-        get(apiTarget, apiProp) {
+      return new Proxy({} as Record<string, unknown>, {
+        get(_apiTarget, apiProp) {
           if (apiProp === "getSession") {
             return async (...args: unknown[]) => {
-              if (USE_MOCK) return null
+              if (USE_MOCK || !process.env.DATABASE_URL?.trim()) return null
+              if (
+                process.env.NODE_ENV === "production" &&
+                !process.env.BETTER_AUTH_SECRET?.trim()
+              ) {
+                return null
+              }
               try {
+                const apiTarget = Reflect.get(target, prop, receiver)
                 const fn = Reflect.get(apiTarget, apiProp) as (...a: unknown[]) => Promise<unknown>
                 return await fn(...args)
               } catch {
@@ -160,7 +166,7 @@ export const auth = new Proxy(realAuth, {
               }
             }
           }
-          return Reflect.get(apiTarget, apiProp)
+          return Reflect.get(Reflect.get(target, prop, receiver), apiProp)
         },
       })
     }
